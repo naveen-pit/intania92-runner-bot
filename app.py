@@ -16,6 +16,7 @@ from __future__ import unicode_literals
 
 import os
 import sys
+import re
 from argparse import ArgumentParser
 
 from flask import Flask, request, abort
@@ -67,10 +68,26 @@ def callback():
             continue
         messages = event.message.text
         message_list = messages.split("\n")
-        if message_list[0].strip()[0:3]=='###':
+        
+        if message_list[0].strip()[0:3]=='===':
+            sorted_list = []
+            for i in range(2,len(message_list)):
+                message = message_list[i]
+                elements = message.strip().split(" ")
+                distance = re.sub(r"[^0-9.]","",elements[2]).strip()
+                try:
+                    distance = float(distance)
+                except ValueError:
+                    distance = 0
+                sorted_list.append((distance,i))
+            sorted_list.sort(key=lambda x:x[0],reverse=True)
+            return_message = message_list[0]+"\n"+message_list[1]+"\n"
+            for info in sorted_list:
+                return_message = return_message+message_list[info[1]]+"\n"
+            return_message = return_message.strip()
             line_bot_api.reply_message(
                 event.reply_token,
-                TextSendMessage(text=event.message.text)
+                TextSendMessage(text=return_message)
             )
 
     return 'OK'
