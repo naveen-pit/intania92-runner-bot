@@ -65,11 +65,13 @@ def callback():
             continue
         if not isinstance(event.message, TextMessage):
             continue
-
-        line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(text=event.message.text)
-        )
+        messages = event.message.text
+        message_list = messages.split("\n")
+        if message_list[0].strip()[0:3]=='###':
+            line_bot_api.reply_message(
+                event.reply_token,
+                TextSendMessage(text=event.message.text)
+            )
 
     return 'OK'
 
