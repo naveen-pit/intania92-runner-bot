@@ -89,6 +89,12 @@ def callback():
                 event.reply_token,
                 TextSendMessage(text=return_message)
             )
+        # elif message_list[0][0]=="+":
+        #     message = message_list[0][1:]
+        #     elements = message.strip().split(" ")
+        #     name = elements[0]
+        #     distance = elements[1]
+
 
     return 'OK'
 
