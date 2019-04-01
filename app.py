@@ -28,6 +28,7 @@ from linebot.exceptions import (
 )
 from linebot.models import (
     MessageEvent, TextMessage, TextSendMessage,
+    SourceUser, SourceGroup, SourceRoom,
 )
 
 app = Flask(__name__)
@@ -94,14 +95,15 @@ def callback():
             continue
         if not isinstance(event.message, TextMessage):
             continue
+        if isinstance(event.source, SourceGroup):
+            chat_id = event.source.group_id
+        elif isinstance(event.source, SourceRoom):
+            chat_id = event.source.room_id
+        else:
+            chat_id = event.source.user_id
         messages = event.message.text
         messages = messages.strip()
         reply_token = event.reply_token
-        chat_id = None
-        if "group_id" in event.source:
-            chat_id = event.source.group_id
-        else:
-            chat_id = event.source.user_id
         return_message = None
         if messages[0:3]=='===':
             return_message = parse_stats(messages)
