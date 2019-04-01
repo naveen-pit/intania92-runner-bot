@@ -63,8 +63,9 @@ def parse_stats(stats,user=None,increase_distance=0):
             match_name = True
         elements[2] = str(distance)
         new_text = ' '.join(elements[1:])
-        sorted_list.append((distance,new_text))
-    if user and not match_name:
+        if distance > 0:
+            sorted_list.append((distance,new_text))
+    if user and not match_name and increase_distance>0:
         sorted_list.append((increase_distance,user+" "+str(increase_distance)))
     sorted_list.sort(key=lambda x:x[0],reverse=True)
     return_message = message_list[0]+"\n"+message_list[1]+"\n"
@@ -96,11 +97,12 @@ def callback():
         messages = event.message.text
         messages = messages.strip()
         reply_token = event.reply_token
-
+        chat_id = event.source.group_id
+        if chat_id is None:
+            chat_id = event.source.user_id
         return_message = None
         if messages[0:3]=='===':
             return_message = parse_stats(messages)
-
         elif "+" in messages:
             elements = messages.split("+")
             if len(elements)==2:
@@ -111,7 +113,7 @@ def callback():
                 except ValueError:
                     return "OK"
                 r = redis.from_url(URI)
-                stats = r.get(reply_token)
+                stats = r.get(chat_id)
 
                 if stats is None:
                     return_message = "leaderboard not init"
@@ -126,9 +128,7 @@ def callback():
             if return_message[0:3]=='===':
                 print(return_message)
                 r = redis.from_url(URI)
-                r.set(reply_token, return_message)
-
-
+                r.set(chat_id, return_message)
     return 'OK'
 
 
