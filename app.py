@@ -1,22 +1,10 @@
 # -*- coding: utf-8 -*-
-
-#  Licensed under the Apache License, Version 2.0 (the "License"); you may
-#  not use this file except in compliance with the License. You may obtain
-#  a copy of the License at
-#
-#       https://www.apache.org/licenses/LICENSE-2.0
-#
-#  Unless required by applicable law or agreed to in writing, software
-#  distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-#  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-#  License for the specific language governing permissions and limitations
-#  under the License.
-
 from __future__ import unicode_literals
 
 import os
 import sys
 import redis
+from decimal import Decimal
 from argparse import ArgumentParser
 
 from flask import Flask, request, abort
@@ -49,7 +37,7 @@ if REDIS_URI is None:
 line_bot_api = LineBotApi(channel_access_token)
 parser = WebhookParser(channel_secret)
 
-def parse_stats(stats,user=None,increase_distance=0):
+def parse_stats(stats,user=None,increase_distance=Decimal('0')):
     message_list = stats.split("\n")
     sorted_list = []
     match_name = False
@@ -59,7 +47,7 @@ def parse_stats(stats,user=None,increase_distance=0):
         name = elements[1].strip()
         distance = 0.0
         try:
-            distance = float(elements[2])
+            distance = Decimal(elements[2])
         except ValueError:
             return "Parse distance error, distance format is incorrect."
         if name == user:
@@ -116,7 +104,7 @@ def callback():
                 name = elements[0].strip()
                 distance = elements[1].strip()
                 try:
-                    distance = float(distance)
+                    distance = Decimal(distance_string)
                 except ValueError:
                     return "OK"
                 r = redis.from_url(REDIS_URI)
@@ -126,7 +114,7 @@ def callback():
                     return_message = "leaderboard not init"
                 else:
                     stats = str(stats,"utf-8")
-                    return_message = parse_stats(stats,user=name,increase_distance=distance)
+                    return_message = parse_stats(stats,user=name,increase_distance=distance_string)
         if return_message:
             line_bot_api.reply_message(
                 reply_token,
