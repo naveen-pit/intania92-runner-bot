@@ -97,8 +97,10 @@ def callback():
         messages = event.message.text
         messages = messages.strip()
         reply_token = event.reply_token
-        chat_id = event.source.group_id
-        if chat_id is None:
+        chat_id = None
+        if "group_id" in event.source:
+            chat_id = event.source.group_id
+        else:
             chat_id = event.source.user_id
         return_message = None
         if messages[0:3]=='===':
