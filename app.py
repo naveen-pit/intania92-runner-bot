@@ -32,17 +32,20 @@ from linebot.models import (
 )
 
 app = Flask(__name__)
-URI="redis://h:p2683f9465e2fcbb6e728f84f905a3234994c14cc2be4e7bcff93c653b67a4480@ec2-35-168-215-149.compute-1.amazonaws.com:17159"
+
 # get channel_secret and channel_access_token from your environment variable
 channel_secret = os.getenv('LINE_CHANNEL_SECRET', None)
 channel_access_token = os.getenv('LINE_CHANNEL_ACCESS_TOKEN', None)
+REDIS_URI= os.getenv('REDIS_URI',None)
 if channel_secret is None:
     print('Specify LINE_CHANNEL_SECRET as environment variable.')
     sys.exit(1)
 if channel_access_token is None:
     print('Specify LINE_CHANNEL_ACCESS_TOKEN as environment variable.')
     sys.exit(1)
-
+if REDIS_URI is None:
+    print('Specify REDIS_URI as environment variable.')
+    sys.exit(1)
 line_bot_api = LineBotApi(channel_access_token)
 parser = WebhookParser(channel_secret)
 
@@ -116,7 +119,7 @@ def callback():
                     distance = float(distance)
                 except ValueError:
                     return "OK"
-                r = redis.from_url(URI)
+                r = redis.from_url(REDIS_URI)
                 stats = r.get(chat_id)
 
                 if stats is None:
@@ -131,7 +134,7 @@ def callback():
             )
             if return_message[0:3]=='===':
                 print(return_message)
-                r = redis.from_url(URI)
+                r = redis.from_url(REDIS_URI)
                 r.set(chat_id, return_message)
     return 'OK'
 
