@@ -67,7 +67,7 @@ def parse_stats(stats,user=None,increase_distance=0):
         if distance > 0:
             sorted_list.append((distance,new_text))
     if user and not match_name and increase_distance>0:
-        sorted_list.append((increase_distance,user+" "+str(increase_distance)))
+        sorted_list.append((increase_distance,user+" "+str(increase_distance)+ " km"))
     sorted_list.sort(key=lambda x:x[0],reverse=True)
     return_message = message_list[0]+"\n"+message_list[1]+"\n"
     for idx,value in enumerate(sorted_list):
