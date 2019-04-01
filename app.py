@@ -104,7 +104,7 @@ def callback():
                 name = elements[0].strip()
                 distance = elements[1].strip()
                 try:
-                    distance = Decimal(distance_string)
+                    distance = Decimal(distance)
                 except ValueError:
                     return "OK"
                 r = redis.from_url(REDIS_URI)
