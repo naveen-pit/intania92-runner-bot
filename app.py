@@ -114,7 +114,7 @@ def callback():
                     return_message = "leaderboard not init"
                 else:
                     stats = str(stats,"utf-8")
-                    return_message = parse_stats(stats,user=name,increase_distance=distance_string)
+                    return_message = parse_stats(stats,user=name,increase_distance=distance)
         if return_message:
             line_bot_api.reply_message(
                 reply_token,
