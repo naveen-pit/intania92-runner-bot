@@ -50,6 +50,8 @@ def parse_stats(stats,user=None,increase_distance=Decimal('0')):
             distance = Decimal(elements[2])
         except ValueError:
             return "Parse distance error, distance format is incorrect."
+        if name.__contains__(' '):
+            return "name cannot contain space"
         if name == user:
             distance = distance + increase_distance
             match_name = True
