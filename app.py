@@ -50,8 +50,6 @@ def parse_stats(stats,user=None,increase_distance=Decimal('0')):
             distance = Decimal(elements[2])
         except ValueError:
             return "Parse distance error, distance format is incorrect."
-        if name.__contains__(' '):
-            return "name cannot contain space"
         if name == user:
             distance = distance + increase_distance
             match_name = True
@@ -104,19 +102,22 @@ def callback():
             elements = messages.split("+")
             if len(elements)==2:
                 name = elements[0].strip()
-                distance = elements[1].strip()
-                try:
-                    distance = Decimal(distance)
-                except ValueError:
-                    return "OK"
-                r = redis.from_url(REDIS_URI)
-                stats = r.get(chat_id)
-
-                if stats is None:
-                    return_message = "leaderboard not init"
+                if name.__contains__(' '):
+                    return_message = "name cannot contain space"
                 else:
-                    stats = str(stats,"utf-8")
-                    return_message = parse_stats(stats,user=name,increase_distance=distance)
+                    distance = elements[1].strip()
+                    try:
+                        distance = Decimal(distance)
+                    except ValueError:
+                        return "OK"
+                    r = redis.from_url(REDIS_URI)
+                    stats = r.get(chat_id)
+
+                    if stats is None:
+                        return_message = "leaderboard not init"
+                    else:
+                        stats = str(stats,"utf-8")
+                        return_message = parse_stats(stats,user=name,increase_distance=distance)
         if return_message:
             line_bot_api.reply_message(
                 reply_token,
