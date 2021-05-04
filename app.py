@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 import os
 import sys
 import redis
-import datetime
+from datetime import datetime, timedelta
 from decimal import Decimal
 from argparse import ArgumentParser
 
@@ -38,14 +38,14 @@ if REDIS_URI is None:
 line_bot_api = LineBotApi(channel_access_token)
 parser = WebhookParser(channel_secret)
 def get_current_month():
-    return datetime.datetime.now().strftime('%B %Y')
+    return (datetime.now()+ timedelta(hours=7)).strftime('%B %Y')
 def is_change_month(month_string):
     return get_current_month() != month_string.strip()
 def parse_stats(message_list,user=None,increase_distance=Decimal('0')):
     sorted_list = []
     match_name = False
     if len(message_list) <2:
-        return 'Please set title and subtitle'
+        return 'Please set title and subtitle in the following format\n===TITLE \n SUBTITLE'
     for i in range(2,len(message_list)):
         message = message_list[i]
         elements = message.strip().split(" ")
@@ -104,8 +104,6 @@ def callback():
         if messages[0:3]=='===':
             message_list = messages.split("\n")
             return_message = parse_stats(message_list)
-        elif messages == '=get_time':
-            return_message = datetime.datetime.now().strftime("%d-%b-%Y (%H:%M:%S.%f)")
         elif "+" in messages:
             elements = messages.split("+")
             if len(elements)==2:
