@@ -38,7 +38,7 @@ if REDIS_URI is None:
 line_bot_api = LineBotApi(channel_access_token)
 parser = WebhookParser(channel_secret)
 def get_current_month():
-    return datetime.datetime.now().strftime('%b %Y')
+    return datetime.datetime.now().strftime('%B %Y')
 def is_change_month(month_string):
     return get_current_month() != month_string.strip()
 def parse_stats(message_list,user=None,increase_distance=Decimal('0')):
@@ -104,6 +104,8 @@ def callback():
         if messages[0:3]=='===':
             message_list = messages.split("\n")
             return_message = parse_stats(message_list)
+        elif messages == '===get_time':
+            return_message = datetime.datetime.now().strftime("%d-%b-%Y (%H:%M:%S.%f)")
         elif "+" in messages:
             elements = messages.split("+")
             if len(elements)==2:
