@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 import os
 import sys
 import redis
+import datetime
 from decimal import Decimal
 from argparse import ArgumentParser
 
@@ -36,11 +37,15 @@ if REDIS_URI is None:
     sys.exit(1)
 line_bot_api = LineBotApi(channel_access_token)
 parser = WebhookParser(channel_secret)
-
-def parse_stats(stats,user=None,increase_distance=Decimal('0')):
-    message_list = stats.split("\n")
+def get_current_month():
+    return datetime.datetime.now().strftime('%b %Y')
+def is_change_month(month_string):
+    return get_current_month()  == month_string.strip()
+def parse_stats(message_list,user=None,increase_distance=Decimal('0')):
     sorted_list = []
     match_name = False
+    if len(message_list) <2:
+        return 'Please set title and subtitle'
     for i in range(2,len(message_list)):
         message = message_list[i]
         elements = message.strip().split(" ")
@@ -97,7 +102,8 @@ def callback():
         reply_token = event.reply_token
         return_message = None
         if messages[0:3]=='===':
-            return_message = parse_stats(messages)
+            message_list = stats.split("\n")
+            return_message = parse_stats(message_list)
         elif "+" in messages:
             elements = messages.split("+")
             if len(elements)==2:
@@ -117,7 +123,12 @@ def callback():
                         return_message = "leaderboard not init"
                     else:
                         stats = str(stats,"utf-8")
-                        return_message = parse_stats(stats,user=name,increase_distance=distance)
+                        message_list = stats.split("\n")
+                        if message_list[0] == '===92 Running Challenge===': #automatically reset board for 92 Running Challenge 
+                            if is_change_month(message_list[1]):
+                                message_list = message_list[:2]
+                                message_list[1] = get_current_month()
+                        return_message = parse_stats(message_list,user=name,increase_distance=distance)
         if return_message:
             line_bot_api.reply_message(
                 reply_token,
