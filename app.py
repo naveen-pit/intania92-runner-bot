@@ -40,7 +40,7 @@ parser = WebhookParser(channel_secret)
 def get_current_month():
     return datetime.datetime.now().strftime('%b %Y')
 def is_change_month(month_string):
-    return get_current_month()  == month_string.strip()
+    return get_current_month() != month_string.strip()
 def parse_stats(message_list,user=None,increase_distance=Decimal('0')):
     sorted_list = []
     match_name = False
@@ -102,7 +102,7 @@ def callback():
         reply_token = event.reply_token
         return_message = None
         if messages[0:3]=='===':
-            message_list = stats.split("\n")
+            message_list = messages.split("\n")
             return_message = parse_stats(message_list)
         elif "+" in messages:
             elements = messages.split("+")
