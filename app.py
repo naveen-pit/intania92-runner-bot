@@ -104,7 +104,7 @@ def callback():
         if messages[0:3]=='===':
             message_list = messages.split("\n")
             return_message = parse_stats(message_list)
-        elif messages == '===get_time':
+        elif messages == '=get_time':
             return_message = datetime.datetime.now().strftime("%d-%b-%Y (%H:%M:%S.%f)")
         elif "+" in messages:
             elements = messages.split("+")
