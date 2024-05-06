@@ -1,0 +1,13 @@
+steps:
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  args:
+  - gcloud
+  - functions
+  - deploy
+  - intania92-runner-bot
+  - --region=asia-southeast1
+  - --source=.
+  - --trigger-topic=run-fetcher
+  - --entry-point=fetch_new_data
+  - --memory=1024MB
+  - --runtime=python311

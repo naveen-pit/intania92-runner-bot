@@ -1,0 +1,145 @@
+[tool.poetry]
+name = "intania92-runner-bot"
+version = "1.0.0"
+description = "intania 92 runner bot "
+authors = ["Naveen <naveen_reg@outlook.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">3.11,<3.12"
+python-dotenv = "^1.0.1"
+# Google clients
+functions-framework = "^3.5.0"
+google-cloud-secret-manager = "^2.19.0"
+line-bot-sdk = "^3.11.0"
+redis = "^5.0.4"
+
+[tool.poetry.group.dev.dependencies]
+black = "23.12.1"
+ruff = "0.3.4"
+mypy = "1.8.0"
+pre-commit = "3.6.2"
+pandas-stubs = "^2.0.3.230814"
+types-requests = "^2.31.0.10"
+flask = "^3.0.3"
+
+[tool.poetry.group.test.dependencies]
+pytest = "^7.4.0"
+pytest-xdist = "^3.3.1"
+pytest-cov = "^4.1.0"
+faker = "^19.10.0"
+pytest-mock = "^3.12.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 105
+target-version = ['py311']
+include = '.*\.py$' # all .py files
+
+[tool.ruff]
+line-length = 105
+target-version = 'py311'
+
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle
+    "F",  # pyflakes
+    "UP", # pyupgrade
+    "D",  # pydocstyle
+    "I",
+    "N",
+    "C90",
+    "ANN",
+    "ASYNC",
+    "YTT",
+    "S",
+    "FBT",
+    "B",
+    "A",
+    "COM",
+    "C4",
+    "DTZ",
+    "T10",
+    "EM",
+    "EXE",
+    "FA",
+    "ISC",
+    "ICN",
+    "G",
+    "INP",
+    "PIE",
+    "T20",
+    "PYI",
+    "PT",
+    "Q",
+    "RSE",
+    "RET",
+    "SLF",
+    "SLOT",
+    "SIM",
+    "TID",
+    "TCH",
+    "INT",
+    "ARG",
+    "PTH",
+    "TD",
+    "FIX",
+    "ERA",
+    "PD",
+    "PGH",
+    "PL",
+    "TRY",
+    "FLY",
+    "NPY",
+    "PERF",
+    "RUF",
+]
+ignore = [
+    "D102",  # Missing docstring in public method
+    "D103",  # Missing docstring in public function
+    "D105",  # Missing docstring in magic method
+    "INP001",  # File is part of an implicit namespace package. Add an `__init__.py`.
+    "COM812",  # Trailing comma missing
+    "TD003",  # Missing issue link on the line following this TODO
+    "FIX002",  # Line contains TODO, consider resolving the issue
+    "FBT002",  # Boolean default value in function definition
+    "ANN002",  # Missing type annotation for `*args`
+    "ANN003",  # Missing type annotation for `**kwargs`
+    "ANN401",  # Dynamically typed expressions (typing.Any) are disallowed in `name`
+    "S104",  # Possible binding to all interfaces
+    "S301",  # `pickle` and modules that wrap it can be unsafe when used to deserialize untrusted data, possible security issue
+    "PERF203",  # `try`-`except` within a loop incurs performance overhead
+    "RET504",  # Unnecessary assignment to `name` before `return` statement
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = [
+    "F401",  #  `something` imported but unused
+    "D104",  #  Missing docstring in public package
+]
+"**/tests/*" = [
+    "S101",  # Use of `assert` detected
+    "ANN001",  # Missing type annotation for function argument `name`
+    "ARG001", # Unused function argument: `name`
+    "ARG002", # Unused method argument: `name`
+    "SLF001",  # Private member accessed: `name`
+    "ANN201",  # Missing return type annotation for public function `name`
+    "PLR2004",  # Magic value used in comparison, consider replacing `value` with a constant variable
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+[tool.mypy]
+files = '**/*.py'
+python_version = "3.11"
+warn_unused_configs = true
+ignore_missing_imports = true
+
+
+[tool.coverage.run]
+branch = true
+relative_files = true
