@@ -13,8 +13,8 @@ lint:
 	poetry run ruff check . && \
 	poetry run mypy .
 
-run:
-	poetry run python -m decisioning
+run_local:
+	poetry run python main.py
 
 generate:
 	poetry export --without-hashes --format=requirements.txt > requirements.txt

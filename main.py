@@ -1,5 +1,9 @@
 """Main entry point of a project."""
+import os
+
 import functions_framework
+from flask import Flask
+from flask import request as req
 from linebot import LineBotApi, WebhookParser
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import (
@@ -12,8 +16,9 @@ from inputs import get_line_credentials
 
 
 @functions_framework.http
-def reply(request) -> None:  # noqa: ANN001
+def reply(request) -> str:  # noqa: ANN001
     main(request)
+    return "OK"
 
 
 def main(request) -> None:  # noqa: ANN001
@@ -45,3 +50,22 @@ def main(request) -> None:  # noqa: ANN001
         reply_token = event.reply_token
         return_message = messages
         line_bot_api.reply_message(reply_token, TextSendMessage(text=return_message))
+
+
+app = Flask(__name__)
+
+
+@app.route("/", methods=["GET"])
+def home() -> str:
+    return "LINE BOT HOME"
+
+
+@app.route("/callback", methods=["POST"])
+def callback() -> str:
+    main(req)
+    return "OK"
+
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8000))
+    app.run(host="0.0.0.0", port=port)
