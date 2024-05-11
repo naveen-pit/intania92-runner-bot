@@ -13,8 +13,11 @@ lint:
 	poetry run ruff check . && \
 	poetry run mypy .
 
-run_local:
-	poetry run python main.py
+run_local:	
+	poetry run python -m flask --app main run --debug --port=8000
+
+run_ngrok:
+	ngrok http 8000
 
 generate:
 	poetry export --without-hashes --format=requirements.txt > requirements.txt

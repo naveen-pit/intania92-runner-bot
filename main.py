@@ -23,15 +23,15 @@ def reply(request) -> str:  # noqa: ANN001
 
 def main(request) -> None:  # noqa: ANN001
     channel_secret, channel_access_token = get_line_credentials()
-
+    print("GOT CREDENTIAL")
     line_bot_api = LineBotApi(channel_access_token)
     parser = WebhookParser(channel_secret)
-
+    print("PARSED")
     signature = request.headers["X-Line-Signature"]
-
+    print(signature)
     # get request body as text
     body = request.get_data(as_text=True)
-
+    print(body)
     # parse webhook body
     try:
         events = parser.parse(body, signature)
@@ -60,12 +60,9 @@ def home() -> str:
     return "LINE BOT HOME"
 
 
-@app.route("/callback", methods=["POST"])
+@app.route("/", methods=["POST"])
 def callback() -> str:
+    print("ENTER")
     main(req)
     return "OK"
 
-
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8000))
-    app.run(host="0.0.0.0", port=port)
