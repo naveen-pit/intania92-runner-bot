@@ -16,7 +16,7 @@ lint:
 run_local:	
 	poetry run python -m flask --app main run --debug --port=8000
 
-run_ngrok:
+ngrok:
 	ngrok http 8000
 
 generate:
