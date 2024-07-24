@@ -3,6 +3,7 @@
 from typing import Self
 
 from google.cloud import secretmanager
+from google.cloud import firestore
 
 
 class Secret:
@@ -14,3 +15,20 @@ class Secret:
     def get_secret(self: Self, name: str) -> str:
         response = self.client.access_secret_version(request={"name": name})
         return response.payload.data.decode("UTF-8")
+
+
+class Firestore:
+    """Firestore client."""
+
+    def __init__(self: Self, project: str | None, database: str | None) -> None:
+        self.client = firestore.Client(project=project, database=database)
+
+    def set_value(self: Self, collection: str, document: str, value: dict) -> None:
+        self.client.collection(collection).document(document).set(value)
+
+    def get_document(self: Self, collection: str, document: str) -> dict | None:
+        doc_ref = self.client.collection(collection).document(document)
+        doc = doc_ref.get()
+        if doc.exists:
+            return doc.to_dict()
+        return None
