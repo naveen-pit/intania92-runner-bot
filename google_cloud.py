@@ -2,8 +2,7 @@
 
 from typing import Self
 
-from google.cloud import secretmanager
-from google.cloud import firestore
+from google.cloud import firestore, secretmanager
 
 
 class Secret:

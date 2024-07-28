@@ -13,7 +13,7 @@ lint:
 	poetry run ruff check . && \
 	poetry run mypy .
 
-run_local:	
+run_local:
 	poetry run python -m flask --app main run --debug --port=8000
 
 ngrok:
@@ -21,3 +21,6 @@ ngrok:
 
 generate:
 	poetry export --without-hashes --format=requirements.txt > requirements.txt
+
+test:
+	poetry run pytest --cov-report=xml --cov-branch -n auto -m "not slow"
