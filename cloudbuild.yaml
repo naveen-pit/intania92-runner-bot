@@ -7,6 +7,7 @@ steps:
   - intania92-runner-bot
   - --no-gen2
   - --region=asia-southeast1
+  - --trigger-http
   - --source=.
   - --entry-point=main
   - --memory=512MB
