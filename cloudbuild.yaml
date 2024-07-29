@@ -5,8 +5,9 @@ steps:
   - functions
   - deploy
   - intania92-runner-bot
+  - --no-gen2
   - --region=asia-southeast1
   - --source=.
   - --entry-point=main
-  - --memory=1024MB
+  - --memory=512MB
   - --runtime=python311
