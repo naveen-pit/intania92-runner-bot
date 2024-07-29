@@ -9,6 +9,6 @@ steps:
   - --region=asia-southeast1
   - --trigger-http
   - --source=.
-  - --entry-point=main
+  - --entry-point=reply
   - --memory=512MB
   - --runtime=python311
