@@ -1,6 +1,5 @@
 """Functions to retreive inputs."""
 from constants import (
-    FIRESTORE_DATABASE,
     FIRESTORE_LEADERBOARD_COLLECTION,
     LINE_ACCESS_TOKEN_KEY,
     LINE_ACCESS_TOKEN_VERSION,
@@ -24,11 +23,9 @@ def get_line_credentials() -> tuple[str, str]:
     return line_channel_secret, line_access_token
 
 
-def get_leaderboard(chat_id: str) -> dict | None:
-    firestore_db = Firestore(project=PROJECT_ID, database=FIRESTORE_DATABASE)
-    return firestore_db.get_document(collection=FIRESTORE_LEADERBOARD_COLLECTION, document=chat_id)
+def get_leaderboard(firestore_client: Firestore, chat_id: str) -> dict | None:
+    return firestore_client.get_document(collection=FIRESTORE_LEADERBOARD_COLLECTION, document=chat_id)
 
 
-def set_leaderboard(chat_id: str, value: dict) -> None:
-    firestore_db = Firestore(project=PROJECT_ID, database=FIRESTORE_DATABASE)
-    firestore_db.set_value(collection=FIRESTORE_LEADERBOARD_COLLECTION, document=chat_id, value=value)
+def set_leaderboard(firestore_client: Firestore, chat_id: str, value: dict) -> None:
+    firestore_client.set_value(collection=FIRESTORE_LEADERBOARD_COLLECTION, document=chat_id, value=value)

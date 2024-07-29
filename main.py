@@ -16,6 +16,8 @@ from linebot.models import (
 )
 
 from cloud_interface import get_leaderboard, get_line_credentials, set_leaderboard
+from constants import FIRESTORE_DATABASE, PROJECT_ID
+from google_cloud import Firestore
 from utils import get_current_month, is_change_month
 
 
@@ -59,7 +61,8 @@ def handle_leaderboard_update(messages: str, chat_id: str) -> str:
     message_list = messages.split("\n")
     return_message = parse_stats(message_list)
     if return_message[0:3] == "===":
-        set_leaderboard(chat_id=chat_id, value={"stats": return_message})
+        firestore_client = Firestore(project=PROJECT_ID, database=FIRESTORE_DATABASE)
+        set_leaderboard(firestore_client, chat_id=chat_id, value={"stats": return_message})
     return return_message
 
 
@@ -78,8 +81,8 @@ def handle_distance_update(messages: str, chat_id: str) -> str:
         parsed_distance = Decimal(distance)
     except ValueError:
         return "Error parsing distance"
-
-    leaderboard = get_leaderboard(chat_id)
+    firestore_client = Firestore(project=PROJECT_ID, database=FIRESTORE_DATABASE)
+    leaderboard = get_leaderboard(firestore_client, chat_id)
     if leaderboard is None or "stats" not in leaderboard:
         return "Leaderboard not initialized"
 
@@ -90,7 +93,7 @@ def handle_distance_update(messages: str, chat_id: str) -> str:
         message_list[1] = get_current_month()
 
     return_message = parse_stats(message_list, user=name, increase_distance=parsed_distance)
-    set_leaderboard(chat_id=chat_id, value={"stats": return_message})
+    set_leaderboard(firestore_client, chat_id=chat_id, value={"stats": return_message})
     return return_message
 
 
