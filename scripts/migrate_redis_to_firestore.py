@@ -1,6 +1,7 @@
 """Migration from redis to firestore."""
 import os
 
+import path  # noqa: F401
 import redis
 
 from constants import FIRESTORE_DATABASE, FIRESTORE_LEADERBOARD_COLLECTION, PROJECT_ID
@@ -23,9 +24,9 @@ def move_redis_to_firestore(redis_client: redis.Redis, firestore_client: Firesto
 
 
 if __name__ == "__main__":
-    redis_host = os.environ["REDIS_HOST"]
-    redis_password = os.environ["REDIS_PASSWORD"]
-    redis_port = int(os.environ["REDIS_PORT"])
+    redis_host = os.environ["LINEBOT_REDIS_HOST"]
+    redis_password = os.environ["LINEBOT_REDIS_PASSWORD"]
+    redis_port = int(os.environ["LINEBOT_REDIS_PORT"])
     # Set up Redis connection
     redis_client = redis.StrictRedis(host=redis_host, password=redis_password, port=redis_port, db=0)
 
