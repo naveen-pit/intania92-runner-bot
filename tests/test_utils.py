@@ -12,7 +12,7 @@ from utils import get_current_month, is_change_month
 def _patch_datetime_now(monkeypatch) -> None:
     class MockDatetime(datetime.datetime):
         @classmethod
-        def now(cls: type[Self], tz: datetime.tzinfo | None = None) -> datetime.datetime:
+        def now(cls: type[Self], tz: datetime.tzinfo | None = None) -> "MockDatetime":
             return cls(2024, 7, 15, 0, 0, 0, tzinfo=tz)
 
     monkeypatch.setattr(datetime, "datetime", MockDatetime)
