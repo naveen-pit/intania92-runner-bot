@@ -1,10 +1,9 @@
 """Migration from redis to firestore."""
-import os
 
 import path  # noqa: F401
 import redis
 
-from constants import FIRESTORE_DATABASE, FIRESTORE_LEADERBOARD_COLLECTION, PROJECT_ID
+from config import cfg
 from google_cloud import Firestore
 
 
@@ -24,14 +23,14 @@ def move_redis_to_firestore(redis_client: redis.Redis, firestore_client: Firesto
 
 
 if __name__ == "__main__":
-    redis_host = os.environ["LINEBOT_REDIS_HOST"]
-    redis_password = os.environ["LINEBOT_REDIS_PASSWORD"]
-    redis_port = int(os.environ["LINEBOT_REDIS_PORT"])
+    redis_host = cfg.redis_host
+    redis_password = cfg.redis_password.get_secret_value()
+    redis_port = cfg.redis_port
     # Set up Redis connection
     redis_client = redis.StrictRedis(host=redis_host, password=redis_password, port=redis_port, db=0)
 
-    firestore_client = Firestore(project=PROJECT_ID, database=FIRESTORE_DATABASE)
+    firestore_client = Firestore(project=cfg.project_id, database=cfg.firestore_database)
 
     move_redis_to_firestore(
-        redis_client, firestore_client=firestore_client, collection_name=FIRESTORE_LEADERBOARD_COLLECTION
+        redis_client, firestore_client=firestore_client, collection_name=cfg.firestore_leaderboard_collection
     )

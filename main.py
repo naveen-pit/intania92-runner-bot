@@ -15,8 +15,8 @@ from linebot.models import (
     TextSendMessage,
 )
 
-from cloud_interface import get_leaderboard, get_line_credentials, set_leaderboard
-from constants import FIRESTORE_DATABASE, PROJECT_ID
+from cloud_interface import get_leaderboard, set_leaderboard
+from config import cfg
 from google_cloud import Firestore
 from utils import get_current_month, is_change_month
 
@@ -61,7 +61,7 @@ def handle_leaderboard_update(messages: str, chat_id: str) -> str:
     message_list = messages.split("\n")
     return_message = parse_stats(message_list)
     if return_message[0:3] == "===":
-        firestore_client = Firestore(project=PROJECT_ID, database=FIRESTORE_DATABASE)
+        firestore_client = Firestore(project=cfg.project_id, database=cfg.firestore_database)
         set_leaderboard(firestore_client, chat_id=chat_id, value={"stats": return_message})
     return return_message
 
@@ -81,7 +81,7 @@ def handle_distance_update(messages: str, chat_id: str) -> str:
         parsed_distance = Decimal(distance)
     except ValueError:
         return "Error parsing distance"
-    firestore_client = Firestore(project=PROJECT_ID, database=FIRESTORE_DATABASE)
+    firestore_client = Firestore(project=cfg.project_id, database=cfg.firestore_database)
     leaderboard = get_leaderboard(firestore_client, chat_id)
     if leaderboard is None or "stats" not in leaderboard:
         return "Leaderboard not initialized"
@@ -129,7 +129,8 @@ def reply(request: Request) -> str:
 
 
 def main(request: Request) -> str | None:
-    channel_secret, channel_access_token = get_line_credentials()
+    channel_secret = cfg.line_channel_secret_key.get_secret_value()
+    channel_access_token = cfg.line_access_token.get_secret_value()
     line_bot_api = LineBotApi(channel_access_token)
     parser = WebhookParser(channel_secret)
     signature = request.headers["X-Line-Signature"]

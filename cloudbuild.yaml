@@ -12,3 +12,4 @@ steps:
   - --entry-point=reply
   - --memory=512MB
   - --runtime=python311
+  - --set-secrets=LINEBOT_LINE_ACCESS_TOKEN=line-channel-access-token:latest,LINEBOT_LINE_CHANNEL_SECRET_KEY=line-channel-secret:latest
