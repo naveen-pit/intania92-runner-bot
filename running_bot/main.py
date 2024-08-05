@@ -15,10 +15,10 @@ from linebot.models import (
     TextSendMessage,
 )
 
-from cloud_interface import get_leaderboard, set_leaderboard
-from config import cfg
-from google_cloud import Firestore
-from utils import get_current_month, is_change_month
+from .cloud_interface import get_leaderboard, set_leaderboard
+from .config import cfg
+from .google_cloud import Firestore
+from .utils import get_current_month, is_change_month
 
 
 def is_leaderboard_input(text: str) -> bool:

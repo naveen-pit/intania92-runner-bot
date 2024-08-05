@@ -1,10 +1,9 @@
 """Migration from redis to firestore."""
 
-import path  # noqa: F401
 import redis
 
-from config import cfg
-from google_cloud import Firestore
+from running_bot.config import cfg
+from running_bot.google_cloud import Firestore
 
 
 def move_redis_to_firestore(redis_client: redis.Redis, firestore_client: Firestore, collection_name: str) -> None:

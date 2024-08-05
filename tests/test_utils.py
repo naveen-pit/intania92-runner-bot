@@ -5,7 +5,7 @@ from typing import Self
 
 import pytest
 
-from utils import get_current_month, is_change_month
+from running_bot.utils import get_current_month, is_change_month
 
 
 @pytest.fixture(autouse=True)

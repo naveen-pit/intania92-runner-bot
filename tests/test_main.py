@@ -4,7 +4,13 @@ from decimal import Decimal
 
 from linebot.models import MessageEvent, SourceGroup, SourceRoom, SourceUser, TextMessage
 
-from main import handle_distance_update, handle_leaderboard_update, is_leaderboard_input, parse_stats, process_event
+from running_bot.main import (
+    handle_distance_update,
+    handle_leaderboard_update,
+    is_leaderboard_input,
+    parse_stats,
+    process_event,
+)
 
 
 def test_is_leaderboard_input():
@@ -53,8 +59,8 @@ def test_handle_leaderboard_update(mocker):
     chat_id = "test_chat_id"
     expected_output = "===TITLE\nSUBTITLE\n1 Jane 10\n2 John 5"
 
-    mocker.patch("main.get_leaderboard", return_value={"stats": messages})
-    mocker.patch("main.set_leaderboard", return_value=None)
+    mocker.patch("running_bot.main.get_leaderboard", return_value={"stats": messages})
+    mocker.patch("running_bot.main.set_leaderboard", return_value=None)
 
     assert handle_leaderboard_update(messages, chat_id) == expected_output
 
@@ -64,24 +70,25 @@ def test_handle_distance_update(mocker):
     chat_id = "test_chat_id"
 
     mocker.patch(
-        "main.get_leaderboard", return_value={"stats": "===92 Running Challenge===\nJuly\n1 Jane 10 km\n2 John 5 km"}
+        "running_bot.main.get_leaderboard",
+        return_value={"stats": "===92 Running Challenge===\nJuly\n1 Jane 10 km\n2 John 5 km"},
     )
-    mocker.patch("main.set_leaderboard", return_value=None)
-    mocker.patch("main.is_change_month", return_value=False)
+    mocker.patch("running_bot.main.set_leaderboard", return_value=None)
+    mocker.patch("running_bot.main.is_change_month", return_value=False)
 
     expected_output = "===92 Running Challenge===\nJuly\n1 Jane 10 km\n2 John 8 km"
     assert handle_distance_update(messages, chat_id) == expected_output
 
-    mocker.patch("main.is_change_month", return_value=True)
-    mocker.patch("main.get_current_month", return_value="August")
+    mocker.patch("running_bot.main.is_change_month", return_value=True)
+    mocker.patch("running_bot.main.get_current_month", return_value="August")
     expected_output = "===92 Running Challenge===\nAugust\n1 John 3 km"
     assert handle_distance_update(messages, chat_id) == expected_output
 
 
 def test_process_event_with_leaderboard_input(mocker):
-    mocker.patch("main.is_leaderboard_input", return_value=True)
-    mocker.patch("main.handle_leaderboard_update", return_value="Leaderboard updated")
-    mock_line_bot_api = mocker.patch("main.LineBotApi")
+    mocker.patch("running_bot.main.is_leaderboard_input", return_value=True)
+    mocker.patch("running_bot.main.handle_leaderboard_update", return_value="Leaderboard updated")
+    mock_line_bot_api = mocker.patch("running_bot.main.LineBotApi")
 
     mock_event = MessageEvent(message=TextMessage(text="===Leaderboard"), source=SourceUser(user_id="user_id"))
 
@@ -91,9 +98,9 @@ def test_process_event_with_leaderboard_input(mocker):
 
 
 def test_process_event_with_distance_update(mocker):
-    mocker.patch("main.is_leaderboard_input", return_value=False)
-    mocker.patch("main.handle_distance_update", return_value="Distance updated")
-    mock_line_bot_api = mocker.patch("main.LineBotApi")
+    mocker.patch("running_bot.main.is_leaderboard_input", return_value=False)
+    mocker.patch("running_bot.main.handle_distance_update", return_value="Distance updated")
+    mock_line_bot_api = mocker.patch("running_bot.main.LineBotApi")
 
     mock_event = MessageEvent(message=TextMessage(text="John +5"), source=SourceUser(user_id="user_id"))
 
@@ -103,7 +110,7 @@ def test_process_event_with_distance_update(mocker):
 
 
 def test_process_event_with_non_text_message(mocker):
-    mock_line_bot_api = mocker.patch("main.LineBotApi")
+    mock_line_bot_api = mocker.patch("running_bot.main.LineBotApi")
 
     mock_event = MessageEvent(message=None, source=SourceUser(user_id="user_id"))
 
@@ -113,7 +120,7 @@ def test_process_event_with_non_text_message(mocker):
 
 
 def test_process_event_with_non_message_event(mocker):
-    mock_line_bot_api = mocker.patch("main.LineBotApi")
+    mock_line_bot_api = mocker.patch("running_bot.main.LineBotApi")
 
     class DummyEvent:
         pass
@@ -126,9 +133,9 @@ def test_process_event_with_non_message_event(mocker):
 
 
 def test_process_event_with_group_source(mocker):
-    mocker.patch("main.is_leaderboard_input", return_value=True)
-    mocker.patch("main.handle_leaderboard_update", return_value="Leaderboard updated")
-    mock_line_bot_api = mocker.patch("main.LineBotApi")
+    mocker.patch("running_bot.main.is_leaderboard_input", return_value=True)
+    mocker.patch("running_bot.main.handle_leaderboard_update", return_value="Leaderboard updated")
+    mock_line_bot_api = mocker.patch("running_bot.main.LineBotApi")
 
     mock_event = MessageEvent(message=TextMessage(text="===Leaderboard"), source=SourceGroup(group_id="group_id"))
 
@@ -138,9 +145,9 @@ def test_process_event_with_group_source(mocker):
 
 
 def test_process_event_with_room_source(mocker):
-    mocker.patch("main.is_leaderboard_input", return_value=True)
-    mocker.patch("main.handle_leaderboard_update", return_value="Leaderboard updated")
-    mock_line_bot_api = mocker.patch("main.LineBotApi")
+    mocker.patch("running_bot.main.is_leaderboard_input", return_value=True)
+    mocker.patch("running_bot.main.handle_leaderboard_update", return_value="Leaderboard updated")
+    mock_line_bot_api = mocker.patch("running_bot.main.LineBotApi")
 
     mock_event = MessageEvent(message=TextMessage(text="===Leaderboard"), source=SourceRoom(room_id="room_id"))
 

@@ -14,13 +14,13 @@ lint:
 	poetry run mypy .
 
 run_local:
-	poetry run python -m flask --app main run --debug --port=8000
+	cd running_bot; poetry run python -m flask --app main run --debug --port=8000
 
 ngrok:
 	ngrok http 8000
 
 generate:
-	poetry export --without-hashes --format=requirements.txt > requirements.txt
+	poetry export --without-hashes --format=requirements.txt > running_bot/requirements.txt
 
 test:
 	poetry run pytest --cov-report=xml --cov-branch -n auto -m "not slow"

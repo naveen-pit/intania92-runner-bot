@@ -1,6 +1,6 @@
 """Functions to retreive inputs."""
-from config import cfg
-from google_cloud import Firestore
+from .config import cfg
+from .google_cloud import Firestore
 
 
 def get_leaderboard(firestore_client: Firestore, chat_id: str) -> dict | None:

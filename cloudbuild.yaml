@@ -8,7 +8,7 @@ steps:
   - --no-gen2
   - --region=asia-southeast1
   - --trigger-http
-  - --source=.
+  - --source=runner_bot/.
   - --entry-point=reply
   - --memory=512MB
   - --runtime=python311

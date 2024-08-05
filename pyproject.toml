@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "intania92-runner-bot"
+name = "running_bot"
 version = "2.0.0"
 description = "intania 92 runner bot "
 authors = ["Naveen <naveen_reg@outlook.com>"]
