@@ -7,8 +7,8 @@ from running_bot.google_cloud import Firestore
 
 
 def move_redis_to_firestore(redis_client: redis.Redis, firestore_client: Firestore, collection_name: str) -> None:
-    cursor = 1
-    while cursor != 0:
+    cursor = 0
+    while True:
         cursor, keys = redis_client.scan(cursor=cursor, count=100)
         for key in keys:
             key_type = redis_client.type(key).decode("utf-8")
@@ -19,6 +19,8 @@ def move_redis_to_firestore(redis_client: redis.Redis, firestore_client: Firesto
                 firestore_client.set_value(
                     collection=collection_name, document=key.decode("utf-8"), value={"stats": value}
                 )
+        if cursor == 0:
+            break
 
 
 if __name__ == "__main__":
