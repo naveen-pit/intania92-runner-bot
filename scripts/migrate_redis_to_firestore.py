@@ -7,6 +7,13 @@ from running_bot.google_cloud import Firestore
 
 
 def move_redis_to_firestore(redis_client: redis.Redis, firestore_client: Firestore, collection_name: str) -> None:
+    """Migrate all string key type in redis to firestore database.
+
+    Additional configs are required in .env
+    - LINEBOT_REDIS_HOST="your_redis_host"
+    - LINEBOT_REDIS_PASSWORD="your_redis_password"
+    - LINEBOT_REDIS_PORT=50000
+    """
     cursor = 0
     while True:
         cursor, keys = redis_client.scan(cursor=cursor, count=100)  # type: ignore[misc]
