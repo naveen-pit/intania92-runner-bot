@@ -9,13 +9,13 @@ from running_bot.google_cloud import Firestore
 def move_redis_to_firestore(redis_client: redis.Redis, firestore_client: Firestore, collection_name: str) -> None:
     cursor = 0
     while True:
-        cursor, keys = redis_client.scan(cursor=cursor, count=100)
+        cursor, keys = redis_client.scan(cursor=cursor, count=100)  # type: ignore[misc]
         for key in keys:
-            key_type = redis_client.type(key).decode("utf-8")
+            key_type = redis_client.type(key).decode("utf-8")  # type: ignore[union-attr]
             if key_type == "string":
                 value = redis_client.get(key)
                 if value is not None:
-                    value = value.decode("utf-8")
+                    value = value.decode("utf-8")  # type: ignore[union-attr]
                 firestore_client.set_value(
                     collection=collection_name, document=key.decode("utf-8"), value={"stats": value}
                 )
