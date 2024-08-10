@@ -31,12 +31,15 @@ class RunSetting(BaseSettings):
 
     @field_validator("project_id", mode="before")
     @staticmethod
-    def get_current_project_id(value: str | None) -> str:
+    def get_current_project_id(value: str | None) -> str | None:
         """Get default project_id if project_id is not speficied."""
         if value is None:
-            _, project_id = google.auth.default()
+            try:
+                _, project_id = google.auth.default()
+            except Exception as _:
+                return None
             return project_id
-        return value
+        return None
 
     line_channel_secret_key: SecretStr = SecretStr("")
     line_access_token: SecretStr = SecretStr("")

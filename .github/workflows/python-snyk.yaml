@@ -1,0 +1,56 @@
+name: Run Snyk for vulnerability checks
+permissions:
+  contents: read
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types:
+      - opened
+      - edited
+      - synchronize
+
+jobs:
+  snyk-python-poetry:
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Set up Poetry
+        uses: Gr1N/setup-poetry@v8
+        with:
+          poetry-version: "1.8.2"
+
+      - name: Configure ssh-key for private modules
+        env:
+          SSH_KEY: ${{ secrets.WORKFLOW_SSH_KEY }}
+        run: >
+          mkdir -p ~/.ssh;
+          echo "$SSH_KEY" > ~/.ssh/id_rsa;
+          chmod 600 ~/.ssh/id_rsa;
+          eval $(ssh-agent);
+          ssh-add ~/.ssh/id_rsa;
+
+      - name: Run Snyk monitor to check for vulnerabilities
+        uses: snyk/actions/python@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: monitor
+          args: --org=naveen-pit
+
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/python@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high

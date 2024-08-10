@@ -1,0 +1,93 @@
+name: Test and Release Package
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+
+jobs:
+  test_and_coverage:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Set up Poetry
+        uses: Gr1N/setup-poetry@v8
+        with:
+          poetry-version: "1.8.2"
+
+      - name: Configure ssh-key for private modules
+        env:
+          SSH_KEY: ${{ secrets.WORKFLOW_SSH_KEY }}
+        run: >
+          mkdir -p ~/.ssh;
+          echo "$SSH_KEY" > ~/.ssh/id_rsa;
+          chmod 600 ~/.ssh/id_rsa;
+          eval $(ssh-agent);
+          ssh-add ~/.ssh/id_rsa;
+
+      - name: Install dependencies
+        run: |
+          poetry install --only=main,test
+
+      - name: Run tests with coverage
+        run: |
+          make test
+
+      - name: Sonarcloud scan
+        uses: sonarsource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  release_job:
+    name: semantic-release
+    runs-on: ubuntu-latest
+    needs: [ test_and_coverage ]
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Configure ssh-key for private modules
+        env:
+          SSH_KEY: ${{ secrets.WORKFLOW_SSH_KEY }}
+        run: >
+          mkdir -p ~/.ssh;
+          echo "$SSH_KEY" > ~/.ssh/id_rsa;
+          chmod 600 ~/.ssh/id_rsa;
+          eval $(ssh-agent);
+          ssh-add ~/.ssh/id_rsa;
+
+      - name: Install dependencies
+        run: |
+          pip install poetry==1.8.2
+          poetry install
+
+      - name: Release if PR merged to main branch
+        uses: cycjimmy/semantic-release-action@v4
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          semantic_version: 18
+          extra_plugins: |
+            @semantic-release/exec

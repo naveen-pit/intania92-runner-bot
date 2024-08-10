@@ -23,4 +23,4 @@ generate:
 	poetry export --without-hashes --format=requirements.txt > running_bot/requirements.txt
 
 test:
-	poetry run pytest --cov-report=xml --cov-branch -n auto -m "not slow"
+	poetry run pytest --cov running_bot --cov scripts --cov-report=xml --cov-branch -n auto -m "not slow"
