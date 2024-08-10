@@ -1,4 +1,4 @@
-# Flask Echo
+# Intania 92 Runner Bot
 
 Sample echo-bot using [Flask](http://flask.pocoo.org/)
 
