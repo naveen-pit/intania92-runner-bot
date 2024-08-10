@@ -33,10 +33,8 @@ jobs:
       - name: Configure ssh-key for private modules
         env:
           SSH_KEY: ${{ secrets.WORKFLOW_SSH_KEY }}
-          TEST_SNYK: ${{ vars.TEST_SNYK }}
         run: >
           echo 1;
-          echo $TEST_SNYK;
           echo $SSH_KEY;
           mkdir -p ~/.ssh;
           echo "$SSH_KEY" > ~/.ssh/id_rsa;
