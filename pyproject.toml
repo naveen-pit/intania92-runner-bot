@@ -24,6 +24,7 @@ pre-commit = "3.6.2"
 pandas-stubs = "^2.0.3.230814"
 types-requests = "^2.31.0.10"
 flask = "^3.0.3"
+redis = "^5.0.8"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^7.4.0"

@@ -30,7 +30,7 @@ jobs:
 
       - name: Configure ssh-key for private modules
         env:
-          SSH_KEY: ${{ secrets.GITHUB_TOKEN }}
+          SSH_KEY: ${{ secrets.WORKFLOW_SSH_KEY }}
         run: >
           mkdir -p ~/.ssh;
           echo "$SSH_KEY" > ~/.ssh/id_rsa;
@@ -70,7 +70,7 @@ jobs:
 
       - name: Configure ssh-key for private modules
         env:
-          SSH_KEY: ${{ secrets.GITHUB_TOKEN }}
+          SSH_KEY: ${{ secrets.WORKFLOW_SSH_KEY }}
         run: >
           mkdir -p ~/.ssh;
           echo "$SSH_KEY" > ~/.ssh/id_rsa;

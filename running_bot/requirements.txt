@@ -59,7 +59,7 @@ pyjwt[crypto]==2.8.0 ; python_full_version > "3.11.0" and python_version < "3.12
 pyparsing==3.1.2 ; python_full_version > "3.11.0" and python_version < "3.12"
 python-dateutil==2.9.0.post0 ; python_full_version > "3.11.0" and python_version < "3.12"
 python-dotenv==1.0.1 ; python_full_version > "3.11.0" and python_version < "3.12"
-redis==5.0.4 ; python_full_version > "3.11.0" and python_version < "3.12"
+redis==5.0.8 ; python_full_version > "3.11.0" and python_version < "3.12"
 requests==2.31.0 ; python_full_version > "3.11.0" and python_version < "3.12"
 rsa==4.9 ; python_full_version > "3.11.0" and python_version < "3.12"
 six==1.16.0 ; python_full_version > "3.11.0" and python_version < "3.12"
