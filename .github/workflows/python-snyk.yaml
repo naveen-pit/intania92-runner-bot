@@ -28,14 +28,14 @@ jobs:
       - name: Set up Poetry
         uses: Gr1N/setup-poetry@v8
         with:
-          poetry-version: "1.5.1"
+          poetry-version: "1.8.2"
 
       - name: Configure ssh-key for private modules
         env:
           SSH_KEY: ${{ secrets.WORKFLOW_SSH_KEY }}
         run: >
-          echo 1
-          echo $SSH_KEY
+          echo 1;
+          echo $SSH_KEY;
           mkdir -p ~/.ssh;
           echo "$SSH_KEY" > ~/.ssh/id_rsa;
           chmod 600 ~/.ssh/id_rsa;
