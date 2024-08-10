@@ -58,7 +58,7 @@ def test_handle_leaderboard_update(mocker):
     messages = "===TITLE\nSUBTITLE\n1 John 5\n2 Jane 10"
     chat_id = "test_chat_id"
     expected_output = "===TITLE\nSUBTITLE\n1 Jane 10\n2 John 5"
-    mocker.patch("running_bot.google_cloud.Firestore", return_value=None)
+    mocker.patch("running_bot.google_cloud.Firestore.__init__", return_value=None)
     mocker.patch("running_bot.main.get_leaderboard", return_value={"stats": messages})
     mocker.patch("running_bot.main.set_leaderboard", return_value=None)
 
@@ -73,7 +73,7 @@ def test_handle_distance_update(mocker):
         "running_bot.main.get_leaderboard",
         return_value={"stats": "===92 Running Challenge===\nJuly\n1 Jane 10 km\n2 John 5 km"},
     )
-    mocker.patch("running_bot.google_cloud.Firestore", return_value=None)
+    mocker.patch("running_bot.google_cloud.Firestore.__init__", return_value=None)
     mocker.patch("running_bot.main.set_leaderboard", return_value=None)
     mocker.patch("running_bot.main.is_change_month", return_value=False)
 
