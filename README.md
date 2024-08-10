@@ -13,7 +13,7 @@ flowchart LR
     B[Google Cloud Functions]
     C[Google Cloud Firestore]
 
-    A[<img src='https://upload.wikimedia.org/wikipedia/commons/4/41/LINE_logo.svg' width='40' height='40' />] --> |HTTP Request & Webhook Events| B
+    A --> |HTTP Request & Webhook Events| B
     B --> |Store & Retrieve Leaderboard Data| C
     B --> |Send Response| A
 
