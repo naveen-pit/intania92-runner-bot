@@ -8,45 +8,17 @@ LINE Bot for Running Challenge Leaderboard in LINE group
 This project is a LINE bot designed to manage and update a running challenge leaderboard. The bot listens to messages, parses input data, updates the leaderboard with running distances, and returns updated leaderboard standings. It is built using Flask, Google Cloud Firestore, and LINE Messaging API.
 
 ```mermaid
-flowchart TD
-    subgraph LINE_API["LINE API"]
-        A1[User Input]
-        A2[Bot Response]
-    end
+flowchart LR
+    A[LINE Client]
+    B[Google Cloud Functions]
+    C[Google Cloud Firestore]
 
-    subgraph Cloud_Functions["Google Cloud Functions"]
-        B1[reply Function]
-        B2[process_event Function]
-        B3[handle_leaderboard_update Function]
-        B4[handle_distance_update Function]
-    end
+    A[<img src='https://upload.wikimedia.org/wikipedia/commons/4/41/LINE_logo.svg' width='40' height='40' />] --> |HTTP Request & Webhook Events| B
+    B --> |Store & Retrieve Leaderboard Data| C
+    B --> |Send Response| A
 
-    subgraph Firestore["Google Cloud Firestore"]
-        C1[Leaderboard Data]
-    end
-
-    subgraph Redis["Redis"]
-        D1[Cache Leaderboard Data]
-    end
-
-    subgraph Config["Configuration"]
-        E1[Environment Variables]
-        E2[config.py]
-    end
-
-    A1 --> |HTTP Request| B1
-    B1 --> |Parse Webhook Event| B2
-    B2 --> |Is Leaderboard Update?| B3
-    B2 --> |Is Distance Update?| B4
-    B3 --> |Update Leaderboard| C1
-    B4 --> |Fetch and Update Leaderboard| C1
-    C1 --> |Cache Updated Leaderboard| D1
-    B3 --> |Respond to User| A2
-    B4 --> |Respond to User| A2
-    B1 --> E2
-    E2 --> B3
-    E2 --> B4
-
+    classDef default fill:#fff,stroke:#000,stroke-width:2px;
+    class A,B,C default;
 ```
 
 ## Features
