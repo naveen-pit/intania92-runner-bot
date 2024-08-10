@@ -20,8 +20,8 @@
       }],
       "@semantic-release/release-notes-generator",
       ["@semantic-release/exec", {
-        "bumpVersion": "poetry version ${nextRelease.version}",
-        "buildPackage": "poetry build"
+        "prepareCmd": "poetry version ${nextRelease.version}",
+        "publishCmd": "poetry build"
       }],
       ["@semantic-release/git", {
         "assets": [
