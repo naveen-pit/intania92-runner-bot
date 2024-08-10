@@ -2,6 +2,7 @@
 
 from decimal import Decimal
 
+import pytest
 from linebot.models import MessageEvent, SourceGroup, SourceRoom, SourceUser, TextMessage
 
 from running_bot.main import (
@@ -11,6 +12,11 @@ from running_bot.main import (
     parse_stats,
     process_event,
 )
+
+
+@pytest.fixture(autouse=True)
+def _patch_google_credential(mocker) -> None:
+    mocker.patch("running_bot.config.RunSetting.get_current_project_id", return_value="")
 
 
 def test_is_leaderboard_input():
