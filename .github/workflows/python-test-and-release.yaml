@@ -88,7 +88,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.CI_GITHUB_TOKEN }}
         with:
-          semantic_version: 21.1.1
+          semantic_version: 20
           extra_plugins: |
             @semantic-release/exec
             @semantic-release/git
