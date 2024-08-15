@@ -93,3 +93,4 @@ jobs:
             @semantic-release/exec
             @semantic-release/git
             @semantic-release/github
+            @semantic-release-extras/verified-git-commit
