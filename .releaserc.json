@@ -23,11 +23,6 @@
         "prepareCmd": "poetry version ${nextRelease.version}",
         "publishCmd": "poetry build"
       }],
-      ["@semantic-release-extras/verified-git-commit", {
-        "assets": [
-          "pyproject.toml"
-        ]
-      }],
       ["@semantic-release/github", {
         "assets": [
           {"path": "dist/**/*"}

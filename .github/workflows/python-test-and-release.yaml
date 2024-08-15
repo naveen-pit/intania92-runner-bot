@@ -91,6 +91,19 @@ jobs:
           semantic_version: 21
           extra_plugins: |
             @semantic-release/exec
-            @semantic-release/git
             @semantic-release/github
-            @semantic-release-extras/verified-git-commit
+      - name: Bump package version
+        env:
+          GITHUB_TOKEN: ${{ secrets.CI_GITHUB_TOKEN }}
+          FILE_TO_COMMIT: pyproject.toml
+          DESTINATION_BRANCH: main
+        run: |
+          export MESSAGE="chore: bump package version in $FILE_TO_COMMIT"
+          export SHA=$( git rev-parse $DESTINATION_BRANCH:$FILE_TO_COMMIT )
+          export CONTENT=$( base64 -i $FILE_TO_COMMIT )
+          gh api --method PUT /repos/:owner/:repo/contents/$FILE_TO_COMMIT \
+            --field message="$MESSAGE" \
+            --field content="$CONTENT" \
+            --field encoding="base64" \
+            --field branch="$DESTINATION_BRANCH" \
+            --field sha="$SHA"
