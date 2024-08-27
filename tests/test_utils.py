@@ -5,7 +5,7 @@ from typing import Self
 
 import pytest
 
-from running_bot.utils import get_current_month, is_change_month
+from running_bot.utils import get_current_month, is_change_month, is_valid_month_string
 
 
 @pytest.fixture(autouse=True)
@@ -31,6 +31,24 @@ def test_get_current_month():
     # Test with a different date_format
     expected_result = "07-2024"
     assert get_current_month(date_format="%m-%Y") == expected_result
+
+
+def test_is_valid_month_string():
+    # test correct format
+    month_string = "July 2024"
+    assert is_valid_month_string(month_string)
+
+    # test wrong format
+    month_string = "July"
+    assert not is_valid_month_string(month_string)
+
+    # test wrong format
+    month_string = "2024 July"
+    assert not is_valid_month_string(month_string)
+
+    # test irrelevant text
+    month_string = "Week5"
+    assert not is_valid_month_string(month_string)
 
 
 @pytest.mark.usefixtures("_patch_datetime_now")
