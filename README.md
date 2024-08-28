@@ -152,3 +152,83 @@ If you want to expose your local development server for external access (e.g., f
 ```bash
 make ngrok
 ```
+
+## How to use
+This project provides a chatbot that integrates with the LINE messaging platform. The bot allows users to interact with a leaderboard system, primarily focused on tracking distances for a running challenge. Below are the steps and commands for chatting with the bot.
+
+### Add the Bot to a Chat
+Ensure the bot is added to your LINE group, room, or as a 1-on-1 chat with the bot.
+Scan following QR code or add the LINE id `@swg8094d`
+
+<img src="https://qr-official.line.me/sid/L/swg8094d.png" alt="LINEBOT QR" width="150" height="150" />
+
+### Quick Start
+
+You can quickly start using the bot. Just send a message in the format `<Your Name>+<Distance>`, and the bot will automatically create and maintain the leaderboard for you.
+
+#### Steps:
+1. **Input Your Distance:**
+   - **Format:** `<Your Name>+<Distance>`
+   - **Example:** `Alice+3.5`
+   - This will automatically initialize the leaderboard with a default title ("Running Challenge") and the current month as the subtitle, and it will add your distance to the leaderboard.
+
+2. **View the Leaderboard:**
+   - After adding your distance, you can view the updated leaderboard by simply checking the bot response:
+   - **Example:**
+   ```
+   ===Running Challenge===
+   August 2024
+   1 Alice 3.5 km
+   ```
+3. Note that the leaderboard resets monthly when the subtitle was set to full month name followed by year (e.g. August 2024). Rename the subtitle if reset is not required.
+
+### Features
+
+**Add/Update Distance**
+- Format: `<Your Name>+<Distance>`
+- Example: `John+5.2`
+- This will add or update the distance associated with your name on the leaderboard.
+
+To subtract distance from the leaderboard, put negative number in the distance
+- Example: `John+-5.2`
+- This will subtract the distance associated with your name on the leaderboard.
+- User whose distance is <= 0 would be removed from the leaderboard
+
+**Update the Leaderboard**
+- Format: Start your message with === followed by the leaderboard title and subtitle on the next lines.
+- Example:
+```
+===YOUR TITLE===
+YOUR SUBTITLE
+```
+
+This will initialize or update the leaderboard with the specified title and subtitle.
+
+- If the leaderboard already had data, feel free to copy the existing leaderboard, edit title, subtitle, name and distance
+- Example:
+
+For a current leaderboard,
+```
+===Running Challenge===
+August 2024
+1 John 10 km
+2 May 2 km
+```
+
+You can copy the current leaderboard, edit title, rename user, adjust distance and send the message in chat
+```
+===Running Go Go===
+Week1
+1 John 10 km
+2 Mary 12 km
+```
+
+The bot will automatically change title, subtitle, user name, and also rerank users by distance.
+
+Bot response:
+```
+===Running Go Go===
+Week1
+1 Mary 12 km
+2 John 10 km
+```
