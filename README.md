@@ -160,7 +160,7 @@ This project provides a chatbot that integrates with the LINE messaging platform
 Ensure the bot is added to your LINE group, room, or as a 1-on-1 chat with the bot.
 Scan following QR code or add the LINE id `@swg8094d`
 
-<img src="https://qr-official.line.me/sid/L/swg8094d.png" alt="LINEBOT QR" width="150" height="150" />
+![Image](https://qr-official.line.me/sid/L/swg8094d.png)
 
 ### Quick Start
 
