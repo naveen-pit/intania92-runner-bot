@@ -71,18 +71,51 @@ def test_handle_distance_update(mocker):
 
     mocker.patch(
         "running_bot.main.get_leaderboard",
-        return_value={"stats": "===92 Running Challenge===\nJuly\n1 Jane 10 km\n2 John 5 km"},
+        return_value={"stats": "===Running Challenge===\nJuly 2024\n1 Jane 10 km\n2 John 5 km"},
     )
     mocker.patch("running_bot.google_cloud.Firestore.__init__", return_value=None)
     mocker.patch("running_bot.main.set_leaderboard", return_value=None)
     mocker.patch("running_bot.main.is_change_month", return_value=False)
 
-    expected_output = "===92 Running Challenge===\nJuly\n1 Jane 10 km\n2 John 8 km"
+    expected_output = "===Running Challenge===\nJuly 2024\n1 Jane 10 km\n2 John 8 km"
     assert handle_distance_update(messages, chat_id) == expected_output
 
     mocker.patch("running_bot.main.is_change_month", return_value=True)
+    mocker.patch("running_bot.main.get_current_month", return_value="August 2024")
+    expected_output = "===Running Challenge===\nAugust 2024\n1 John 3 km"
+    assert handle_distance_update(messages, chat_id) == expected_output
+
+
+def test_handle_distance_update_no_leaderboard(mocker):
+    messages = "John +3"
+    chat_id = "test_chat_id"
+
+    mocker.patch(
+        "running_bot.main.get_leaderboard",
+        return_value=None,
+    )
+    mocker.patch("running_bot.google_cloud.Firestore.__init__", return_value=None)
+    mocker.patch("running_bot.main.set_leaderboard", return_value=None)
+    mocker.patch("running_bot.main.is_change_month", return_value=False)
     mocker.patch("running_bot.main.get_current_month", return_value="August")
-    expected_output = "===92 Running Challenge===\nAugust\n1 John 3 km"
+
+    expected_output = "===Running Challenge===\nAugust\n1 John 3 km"
+    assert handle_distance_update(messages, chat_id) == expected_output
+
+
+def test_handle_distance_invalid_month(mocker):
+    messages = "John +3"
+    chat_id = "test_chat_id"
+
+    mocker.patch(
+        "running_bot.main.get_leaderboard",
+        return_value={"stats": "===Running Challenge===\nJuly\n1 Jane 10 km\n2 John 5 km"},
+    )
+    mocker.patch("running_bot.google_cloud.Firestore.__init__", return_value=None)
+    mocker.patch("running_bot.main.set_leaderboard", return_value=None)
+    mocker.patch("running_bot.main.get_current_month", return_value="August")
+
+    expected_output = "===Running Challenge===\nJuly\n1 Jane 10 km\n2 John 8 km"
     assert handle_distance_update(messages, chat_id) == expected_output
 
 

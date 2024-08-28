@@ -18,7 +18,7 @@ from linebot.models import (
 from .cloud_interface import get_leaderboard, set_leaderboard
 from .config import cfg
 from .google_cloud import Firestore
-from .utils import get_current_month, is_change_month
+from .utils import get_current_month, is_change_month, is_valid_month_string
 
 
 def is_leaderboard_input(text: str) -> bool:
@@ -84,13 +84,13 @@ def handle_distance_update(messages: str, chat_id: str) -> str:
     firestore_client = Firestore(project=cfg.project_id, database=cfg.firestore_database)
     leaderboard = get_leaderboard(firestore_client, chat_id)
     if leaderboard is None or "stats" not in leaderboard:
-        return "Leaderboard not initialized"
-
-    stats = leaderboard["stats"]
-    message_list = stats.split("\n")
-    if message_list[0] == "===92 Running Challenge===" and is_change_month(message_list[1]):
-        message_list = message_list[:2]
-        message_list[1] = get_current_month()
+        message_list = ["===Running Challenge===", get_current_month()]
+    else:
+        stats = leaderboard["stats"]
+        message_list = stats.split("\n")
+        if is_valid_month_string(message_list[1]) and is_change_month(message_list[1]):
+            message_list = message_list[:2]
+            message_list[1] = get_current_month()
 
     return_message = parse_stats(message_list, user=name, increase_distance=parsed_distance)
     set_leaderboard(firestore_client, chat_id=chat_id, value={"stats": return_message})
