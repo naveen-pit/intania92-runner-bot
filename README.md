@@ -160,7 +160,7 @@ This project provides a chatbot that integrates with the LINE messaging platform
 Ensure the bot is added to your LINE group, room, or as a 1-on-1 chat with the bot.
 Scan following QR code or add the LINE id `@swg8094d`
 
-<img src="https://qr-official.line.me/sid/L/swg8094d.png" alt="LINEBOT QR" width="150" height="150" />
+<img src="./images/linebot_qr.png" alt="linebot qr code" width="200" height="200"/>
 
 ### Quick Start
 
@@ -215,7 +215,7 @@ August 2024
 2 May 2 km
 ```
 
-You can copy the current leaderboard, edit title, rename user, adjust distance and send the message in chat
+You can copy the current leaderboard, edit title, rename user, adjust distance and send the message in chat. In this example, we rename a title to `Running Go Go`, rename a subtitle to `Week1`, rename `May` to `Mary` and set her distance to `12` km
 ```
 ===Running Go Go===
 Week1
