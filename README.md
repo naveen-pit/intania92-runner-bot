@@ -215,7 +215,7 @@ August 2024
 2 May 2 km
 ```
 
-You can copy the current leaderboard, edit title, rename user, adjust distance and send the message in chat
+You can copy the current leaderboard, edit title, rename user, adjust distance and send the message in chat. In this example, we rename a title to `Running Go Go`, rename a subtitle to `Week1`, rename `May` to `Mary` and set her distance to `12` km
 ```
 ===Running Go Go===
 Week1
