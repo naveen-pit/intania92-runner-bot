@@ -192,7 +192,7 @@ You can quickly start using the bot. Just send a message in the format `<Your Na
 To subtract distance from the leaderboard, put negative number in the distance
 - Example: `John+-5.2`
 - This will subtract the distance associated with your name on the leaderboard.
-- User whose distance is <= 0 would be removed from the leaderboard
+- User whose distance is <= 0 will be removed from the leaderboard
 
 **Update the Leaderboard**
 - Format: Start your message with === followed by the leaderboard title and subtitle on the next lines.
@@ -223,7 +223,7 @@ Week1
 2 Mary 12 km
 ```
 
-The bot will automatically change title, subtitle, user name, and also rerank users by distance.
+The bot will change title, subtitle, user name, and also rerank users by distance.
 
 Bot response:
 ```
