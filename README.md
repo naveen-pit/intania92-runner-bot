@@ -189,6 +189,11 @@ You can quickly start using the bot. Just send a message in the format `<Your Na
 - Example: `John+5.2`
 - This will add or update the distance associated with your name on the leaderboard.
 
+You can add as many distances as you need, as long as distance are numbers.
+- Format: `<Your Name>+<Distance>+<Distance>+...`
+- Example: `John+5.2+2+4`
+- This will add or update the distance associated with your name on the leaderboard.
+
 To subtract distance from the leaderboard, put negative number in the distance
 - Example: `John+-5.2`
 - This will subtract the distance associated with your name on the leaderboard.
