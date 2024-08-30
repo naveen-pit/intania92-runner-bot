@@ -1,6 +1,6 @@
 """Main entry point of a project."""
 
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 
 import functions_framework
 from flask import Flask, Request
@@ -69,18 +69,24 @@ def handle_leaderboard_update(messages: str, chat_id: str) -> str:
 def handle_distance_update(messages: str, chat_id: str) -> str:
     elements = messages.split("+")
     element_count = 2
-    if len(elements) != element_count:
+    if len(elements) < element_count:
         return "Invalid format"
 
     name = elements[0].strip()
+    if name == "":
+        return "Please specify name"
     if " " in name:
         return "Name cannot contain space"
 
-    distance = elements[1].strip()
-    try:
-        parsed_distance = Decimal(distance)
-    except ValueError:
-        return "Error parsing distance"
+    # Sum up all the distances
+    total_distance = Decimal(0)
+    for distance in elements[1:]:
+        try:
+            parsed_distance = Decimal(distance.strip())
+            total_distance += parsed_distance
+        except InvalidOperation:
+            return f"Error parsing distance: {distance.strip()}"
+
     firestore_client = Firestore(project=cfg.project_id, database=cfg.firestore_database)
     leaderboard = get_leaderboard(firestore_client, chat_id)
     if leaderboard is None or "stats" not in leaderboard:
@@ -92,7 +98,7 @@ def handle_distance_update(messages: str, chat_id: str) -> str:
             message_list = message_list[:2]
             message_list[1] = get_current_month()
 
-    return_message = parse_stats(message_list, user=name, increase_distance=parsed_distance)
+    return_message = parse_stats(message_list, user=name, increase_distance=total_distance)
     set_leaderboard(firestore_client, chat_id=chat_id, value={"stats": return_message})
     return return_message
 
