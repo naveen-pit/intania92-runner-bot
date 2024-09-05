@@ -93,7 +93,7 @@ gcloud builds submit --config cloudbuild.yaml
 - allUsers are accessible the cloud function with `Cloud Functions Invoker` role.
 - Service account of the cloud function has granted to Firebase
 
-The `cloudbuild.yaml` file is configured to deploy the function to the `asia-southeast1` region, use Python 3.11 runtime, and set the necessary secrets for LINE API integration.
+The `cloudbuild.yaml` file is configured to deploy the function to the `asia-southeast1` region, use Python 3.12 runtime, and set the necessary secrets for LINE API integration.
 
 ## Cloud Build Configuration (cloudbuild.yaml)
 ```yaml
