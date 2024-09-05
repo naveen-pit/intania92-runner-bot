@@ -11,7 +11,7 @@ steps:
   - --source=running_bot/.
   - --entry-point=reply
   - --memory=512MB
-  - --runtime=python311
+  - --runtime=python312
   - --set-secrets=LINEBOT_LINE_ACCESS_TOKEN=line-channel-access-token:latest,LINEBOT_LINE_CHANNEL_SECRET_KEY=line-channel-secret:latest
 options:
   logging: CLOUD_LOGGING_ONLY
