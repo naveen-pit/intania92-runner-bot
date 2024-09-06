@@ -53,6 +53,12 @@ def test_parse_stats():
     expected_output = "===TITLE\nSUBTITLE\n1 John 5 km"
     assert parse_stats(message_list, user, increase_distance) == expected_output, "New user was not added."
 
+    message_list = ["===TITLE", "SUBTITLE", "1 John a5 km"]
+    user = "John"
+    increase_distance = Decimal("5")
+    expected_output = "Parse distance error, distance format is incorrect."
+    assert parse_stats(message_list, user, increase_distance) == expected_output, "Invalid distance in leaderboard"
+
 
 def test_handle_leaderboard_update(mocker):
     messages = "===TITLE\nSUBTITLE\n1 John 5\n2 Jane 10"
@@ -255,6 +261,18 @@ def test_process_event_with_distance_update(mocker):
     mock_line_bot_api = mocker.patch("running_bot.main.LineBotApi")
 
     mock_event = MessageEvent(message=TextMessage(text="John +5"), source=SourceUser(user_id="user_id"))
+
+    result = process_event(mock_event, mock_line_bot_api)
+
+    assert result == "Distance updated"
+
+
+def test_process_event_with_negative_distance_update(mocker):
+    mocker.patch("running_bot.main.is_leaderboard_input", return_value=False)
+    mocker.patch("running_bot.main.handle_distance_update", return_value="Distance updated")
+    mock_line_bot_api = mocker.patch("running_bot.main.LineBotApi")
+
+    mock_event = MessageEvent(message=TextMessage(text="John -5"), source=SourceUser(user_id="user_id"))
 
     result = process_event(mock_event, mock_line_bot_api)
 

@@ -39,7 +39,7 @@ def parse_stats(message_list: list[str], user: str | None = None, increase_dista
         distance = Decimal(0.0)
         try:
             distance = Decimal(elements[2])
-        except ValueError:
+        except InvalidOperation:
             return "Parse distance error, distance format is incorrect."
         if name == user:
             distance = distance + increase_distance
