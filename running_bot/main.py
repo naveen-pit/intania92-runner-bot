@@ -1,6 +1,7 @@
 """Main entry point of a project."""
 
 from decimal import Decimal, InvalidOperation
+from typing import Literal
 
 import functions_framework
 from flask import Flask, Request
@@ -38,7 +39,7 @@ def parse_stats(message_list: list[str], user: str | None = None, increase_dista
         distance = Decimal(0.0)
         try:
             distance = Decimal(elements[2])
-        except ValueError:
+        except InvalidOperation:
             return "Parse distance error, distance format is incorrect."
         if name == user:
             distance = distance + increase_distance
@@ -66,8 +67,8 @@ def handle_leaderboard_update(messages: str, chat_id: str) -> str:
     return return_message
 
 
-def handle_distance_update(messages: str, chat_id: str) -> str:
-    elements = messages.split("+")
+def handle_distance_update(messages: str, chat_id: str, symbol: Literal["+", "-"]) -> str:
+    elements = messages.split(symbol)
     element_count = 2
     if len(elements) < element_count:
         return "Invalid format"
@@ -86,7 +87,8 @@ def handle_distance_update(messages: str, chat_id: str) -> str:
             total_distance += parsed_distance
         except InvalidOperation:
             return f"Error parsing distance: {distance.strip()}"
-
+    if symbol == "-":
+        total_distance = -total_distance
     firestore_client = Firestore(project=cfg.project_id, database=cfg.firestore_database)
     leaderboard = get_leaderboard(firestore_client, chat_id)
     if leaderboard is None or "stats" not in leaderboard:
@@ -122,7 +124,9 @@ def process_event(event: MessageEvent, line_bot_api: LineBotApi) -> str | None:
     if is_leaderboard_input(messages):
         return_message = handle_leaderboard_update(messages, chat_id)
     elif "+" in messages:
-        return_message = handle_distance_update(messages, chat_id)
+        return_message = handle_distance_update(messages, chat_id, "+")
+    elif "-" in messages:
+        return_message = handle_distance_update(messages, chat_id, "-")
     if return_message:
         line_bot_api.reply_message(reply_token, TextSendMessage(text=return_message))
     return return_message
