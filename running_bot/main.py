@@ -42,6 +42,8 @@ def parse_stats(message_list: list[str], user: str | None = None, increase_dista
         distance = Decimal(0.0)
         try:
             distance = Decimal(elements[2])
+            print(name)
+            print(distance)
         except InvalidOperation:
             return "Parse distance error, distance format is incorrect."
         if name == user:
@@ -71,8 +73,15 @@ def handle_leaderboard_update(messages: str, event: MessageEvent) -> str:
 
 
 def update_distance_in_database(name: str, distance_string: str, chat_id: str, symbol: Literal["+", "-"]) -> str | None:
+    print("update distance in db")
+    print("params")
+    print(f"name:{name}")
+    print(f"distance_string:{distance_string}")
+    print(f"chat_id:{chat_id}")
+    print(f"symbol:{symbol}")
     elements = distance_string.split(symbol)
     element_count = 1
+    print(elements)
     if len(elements) < element_count:
         return "Invalid format"
     if len(elements) == element_count and elements[0] == 0:
@@ -87,8 +96,12 @@ def update_distance_in_database(name: str, distance_string: str, chat_id: str, s
             return f"Error parsing distance: {distance.strip()}"
     if symbol == "-":
         total_distance = -total_distance
+    if total_distance==Decimal(0):
+        return None
+    print(f"total_distance={total_distance}")
     firestore_client = Firestore(project=cfg.project_id, database=cfg.firestore_database)
     leaderboard = get_leaderboard(firestore_client, chat_id)
+    print(f"current_leaderboard: {leaderboard}")
     if leaderboard is None or "stats" not in leaderboard:
         message_list = ["===Running Challenge===", get_current_month()]
     else:
@@ -120,14 +133,23 @@ def get_user_id(event: MessageEvent) -> str:
 def process_event(event: MessageEvent, line_bot_api: LineBotApi) -> str | None:
     if isinstance(event, MessageEvent):
         return_message = None
+        reply_message_list=[]
         reply_token = event.reply_token
 
         firestore_client = Firestore(project=cfg.project_id, database=cfg.firestore_database)
 
         stored_name = get_name(firestore_client, get_user_id(event))
-        if isinstance(event.message, ImageMessage) and "imageSetId" not in event.message and stored_name:
+        
+        print(stored_name)
+        print(event.message)
+        print(isinstance(event.message, ImageMessage))
+        # print("imageSet" not in event.message)
+        # print(isinstance(event.message, ImageMessage) and "imageSet" not in event.message and stored_name)
+        if isinstance(event.message, ImageMessage) and event.message.image_set is None and stored_name:
+            name=stored_name["name"]
             message_id = event.message.id
             message_content = line_bot_api.get_message_content(message_id)
+            print("got message content")
             # Read the image content into memory
             image_bytes = io.BytesIO(message_content.content)
 
@@ -135,10 +157,13 @@ def process_event(event: MessageEvent, line_bot_api: LineBotApi) -> str | None:
             image = Image.open(image_bytes)
 
             distance = get_distance_easyocr(image)
+            print(distance)
             if distance > 0:
-                update_message = f"{stored_name}+{distance}"
-                line_bot_api.reply_message(reply_token, TextSendMessage(text=update_message))
+                update_message = f"{name} + {distance}"
+                reply_message_list.append(TextSendMessage(text=update_message))
                 return_message = handle_distance_update(update_message, event, "+")
+                print("updated leaderboard in db")
+                print(return_message)
 
         elif isinstance(event.message, TextMessage):
             messages = event.message.text.strip()
@@ -148,15 +173,22 @@ def process_event(event: MessageEvent, line_bot_api: LineBotApi) -> str | None:
                 return_message = handle_distance_update(messages, event, "+")
             elif "-" in messages:
                 return_message = handle_distance_update(messages, event, "-")
+        print(return_message)
         if return_message:
-            line_bot_api.reply_message(reply_token, TextSendMessage(text=return_message))
+            print("reply with leaderboard")
+            # line_bot_api.push_message(get_chat_id(event),TextSendMessage(text=return_message))
+            reply_message_list.append(TextSendMessage(text=return_message))
+            line_bot_api.reply_message(reply_token,reply_message_list )
             return return_message
     return None
 
 
 def handle_distance_update(messages: str, event: MessageEvent, split_symbol: Literal["+", "-"]) -> str | None:
+    print("===handle distance update===")
     return_message = None
     extracted_name, extracted_distance = extract_name_and_distance_from_message(messages, split_symbol)
+    print(extracted_name)
+    print(extracted_distance)
     if extracted_name and extracted_distance:
         firestore_client = Firestore(project=cfg.project_id, database=cfg.firestore_database)
         # TODO(Naveen): send a message if extracted name and stored name does not match
@@ -215,5 +247,7 @@ def home() -> str:
 
 @app.route("/", methods=["POST"])
 def callback() -> str:
+    print("callback")
     main(req)
+    print("done")
     return "OK"
