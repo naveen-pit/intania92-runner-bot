@@ -5,11 +5,11 @@ from decimal import Decimal
 from linebot.models import MessageEvent, SourceGroup, SourceRoom, SourceUser, TextMessage
 
 from running_bot.main import (
-    handle_distance_update,
     handle_leaderboard_update,
     is_leaderboard_input,
     parse_stats,
     process_event,
+    update_distance_in_database,
 )
 
 
@@ -82,27 +82,27 @@ def test_handle_distance_update_with_error(mocker):
 
     expected_output = "Invalid format"
 
-    assert handle_distance_update(messages, chat_id, "+") == expected_output
+    assert update_distance_in_database(messages, chat_id, "+") == expected_output
 
     messages = "+3"
     expected_output = "Please specify name"
-    assert handle_distance_update(messages, chat_id, "+") == expected_output
+    assert update_distance_in_database(messages, chat_id, "+") == expected_output
 
     messages = "John H+3"
     expected_output = "Name cannot contain space"
-    assert handle_distance_update(messages, chat_id, "+") == expected_output
+    assert update_distance_in_database(messages, chat_id, "+") == expected_output
 
     messages = "John+3+a"
     expected_output = "Error parsing distance: a"
-    assert handle_distance_update(messages, chat_id, "+") == expected_output
+    assert update_distance_in_database(messages, chat_id, "+") == expected_output
 
     messages = "John+"
     expected_output = "Error parsing distance: "
-    assert handle_distance_update(messages, chat_id, "+") == expected_output
+    assert update_distance_in_database(messages, chat_id, "+") == expected_output
 
     messages = "John+3-1"
     expected_output = "Error parsing distance: 3-1"
-    assert handle_distance_update(messages, chat_id, "+") == expected_output
+    assert update_distance_in_database(messages, chat_id, "+") == expected_output
 
 
 def test_handle_distance_increment(mocker):
@@ -118,12 +118,12 @@ def test_handle_distance_increment(mocker):
     mocker.patch("running_bot.main.is_change_month", return_value=False)
 
     expected_output = "===Running Challenge===\nJuly 2024\n1 Jane 10 km\n2 John 8 km"
-    assert handle_distance_update(messages, chat_id, "+") == expected_output
+    assert update_distance_in_database(messages, chat_id, "+") == expected_output
 
     mocker.patch("running_bot.main.is_change_month", return_value=True)
     mocker.patch("running_bot.main.get_current_month", return_value="August 2024")
     expected_output = "===Running Challenge===\nAugust 2024\n1 John 3 km"
-    assert handle_distance_update(messages, chat_id, "+") == expected_output
+    assert update_distance_in_database(messages, chat_id, "+") == expected_output
 
 
 def test_handle_multiple_distance_increment(mocker):
@@ -139,12 +139,12 @@ def test_handle_multiple_distance_increment(mocker):
     mocker.patch("running_bot.main.is_change_month", return_value=False)
 
     expected_output = "===Running Challenge===\nJuly 2024\n1 Jane 10 km\n2 John 8.5 km"
-    assert handle_distance_update(messages, chat_id, "+") == expected_output
+    assert update_distance_in_database(messages, chat_id, "+") == expected_output
 
     mocker.patch("running_bot.main.is_change_month", return_value=True)
     mocker.patch("running_bot.main.get_current_month", return_value="August 2024")
     expected_output = "===Running Challenge===\nAugust 2024\n1 John 3.5 km"
-    assert handle_distance_update(messages, chat_id, "+") == expected_output
+    assert update_distance_in_database(messages, chat_id, "+") == expected_output
 
 
 def test_handle_multiple_distance_increment_with_negative(mocker):
@@ -160,12 +160,12 @@ def test_handle_multiple_distance_increment_with_negative(mocker):
     mocker.patch("running_bot.main.is_change_month", return_value=False)
 
     expected_output = "===Running Challenge===\nJuly 2024\n1 Jane 10 km\n2 John 5.5 km"
-    assert handle_distance_update(messages, chat_id, "+") == expected_output
+    assert update_distance_in_database(messages, chat_id, "+") == expected_output
 
     mocker.patch("running_bot.main.is_change_month", return_value=True)
     mocker.patch("running_bot.main.get_current_month", return_value="August 2024")
     expected_output = "===Running Challenge===\nAugust 2024\n1 John 0.5 km"
-    assert handle_distance_update(messages, chat_id, "+") == expected_output
+    assert update_distance_in_database(messages, chat_id, "+") == expected_output
 
 
 def test_handle_distance_decrease(mocker):
@@ -181,12 +181,12 @@ def test_handle_distance_decrease(mocker):
     mocker.patch("running_bot.main.is_change_month", return_value=False)
 
     expected_output = "===Running Challenge===\nJuly 2024\n1 Jane 10 km\n2 John 2 km"
-    assert handle_distance_update(messages, chat_id, "-") == expected_output
+    assert update_distance_in_database(messages, chat_id, "-") == expected_output
 
     mocker.patch("running_bot.main.is_change_month", return_value=True)
     mocker.patch("running_bot.main.get_current_month", return_value="August 2024")
     expected_output = "===Running Challenge===\nAugust 2024"
-    assert handle_distance_update(messages, chat_id, "-") == expected_output
+    assert update_distance_in_database(messages, chat_id, "-") == expected_output
 
 
 def test_handle_multiple_distance_decrease(mocker):
@@ -202,12 +202,12 @@ def test_handle_multiple_distance_decrease(mocker):
     mocker.patch("running_bot.main.is_change_month", return_value=False)
 
     expected_output = "===Running Challenge===\nJuly 2024\n1 Jane 10 km\n2 John 2.5 km"
-    assert handle_distance_update(messages, chat_id, "-") == expected_output
+    assert update_distance_in_database(messages, chat_id, "-") == expected_output
 
     mocker.patch("running_bot.main.is_change_month", return_value=True)
     mocker.patch("running_bot.main.get_current_month", return_value="August 2024")
     expected_output = "===Running Challenge===\nAugust 2024"
-    assert handle_distance_update(messages, chat_id, "-") == expected_output
+    assert update_distance_in_database(messages, chat_id, "-") == expected_output
 
 
 def test_handle_distance_update_no_leaderboard(mocker):
@@ -224,7 +224,7 @@ def test_handle_distance_update_no_leaderboard(mocker):
     mocker.patch("running_bot.main.get_current_month", return_value="August")
 
     expected_output = "===Running Challenge===\nAugust\n1 John 3 km"
-    assert handle_distance_update(messages, chat_id, "+") == expected_output
+    assert update_distance_in_database(messages, chat_id, "+") == expected_output
 
 
 def test_handle_distance_invalid_month(mocker):
@@ -240,7 +240,7 @@ def test_handle_distance_invalid_month(mocker):
     mocker.patch("running_bot.main.get_current_month", return_value="August")
 
     expected_output = "===Running Challenge===\nJuly\n1 Jane 10 km\n2 John 8 km"
-    assert handle_distance_update(messages, chat_id, "+") == expected_output
+    assert update_distance_in_database(messages, chat_id, "+") == expected_output
 
 
 def test_process_event_with_leaderboard_input(mocker):
