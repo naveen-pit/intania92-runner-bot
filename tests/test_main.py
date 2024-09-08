@@ -6,16 +6,10 @@ from linebot.models import MessageEvent, SourceGroup, SourceRoom, SourceUser, Te
 
 from running_bot.main import (
     handle_leaderboard_update,
-    is_leaderboard_format,
     parse_stats,
     process_message_event,
     update_distance_in_database,
 )
-
-
-def test_is_leaderboard_format():
-    assert is_leaderboard_format("===Leaderboard")
-    assert not is_leaderboard_format("Leaderboard")
 
 
 def test_parse_stats():
@@ -92,6 +86,22 @@ def test_handle_distance_update_with_error(mocker):
     distance_string = "3-1"
     expected_output = "Error parsing distance"
     assert update_distance_in_database(name, distance_string, chat_id, "+") == expected_output
+
+
+def test_handle_zero_distance(mocker):
+    name = "John"
+    distance_string = "0"
+    chat_id = "test_chat_id"
+
+    mocker.patch(
+        "running_bot.main.get_leaderboard",
+        return_value={"stats": "===Running Challenge===\nJuly 2024\n1 Jane 10 km\n2 John 5 km"},
+    )
+    mocker.patch("running_bot.google_cloud.Firestore.__init__", return_value=None)
+    mocker.patch("running_bot.main.set_leaderboard", return_value=None)
+    mocker.patch("running_bot.main.is_change_month", return_value=False)
+
+    assert update_distance_in_database(name, distance_string, chat_id, "+") is None
 
 
 def test_handle_distance_increment(mocker):

@@ -9,7 +9,7 @@ from flask import Flask, Request
 from flask import request as req
 from linebot import LineBotApi, WebhookParser
 from linebot.exceptions import InvalidSignatureError
-from linebot.models import ImageMessage, MessageEvent, SourceGroup, SourceRoom, TextMessage, TextSendMessage
+from linebot.models import ImageMessage, MessageEvent, TextMessage, TextSendMessage
 from PIL import Image
 
 from running_bot.ocr import extract_distance_from_image
@@ -17,11 +17,7 @@ from running_bot.ocr import extract_distance_from_image
 from .cloud_interface import get_leaderboard, get_name, set_leaderboard, set_name
 from .config import cfg
 from .google_cloud import Firestore
-from .utils import get_current_month, is_change_month, is_valid_month_string
-
-
-def is_leaderboard_format(text: str) -> bool:
-    return text.startswith("===")
+from .utils import get_chat_id, get_current_month, is_change_month, is_leaderboard_format, is_valid_month_string
 
 
 def parse_stats(
@@ -98,14 +94,6 @@ def update_distance_in_database(name: str, distance_string: str, chat_id: str, s
     return_message = parse_stats(message_list, user=name, increase_distance=total_distance)
     set_leaderboard(firestore_client, chat_id=chat_id, value={"stats": return_message})
     return return_message
-
-
-def get_chat_id(event: MessageEvent) -> str:
-    if isinstance(event.source, SourceGroup):
-        return event.source.group_id
-    if isinstance(event.source, SourceRoom):
-        return event.source.room_id
-    return event.source.user_id
 
 
 def process_message_event(event: MessageEvent, line_bot_api: LineBotApi) -> str | None:

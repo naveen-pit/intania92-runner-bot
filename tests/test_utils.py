@@ -1,11 +1,12 @@
 """Test utils functions."""
-
 import datetime
 from typing import Self
 
 import pytest
+from linebot.models import MessageEvent, SourceGroup, SourceRoom, SourceUser
 
-from running_bot.utils import get_current_month, is_change_month, is_valid_month_string
+from running_bot.main import get_chat_id
+from running_bot.utils import get_current_month, is_change_month, is_leaderboard_format, is_valid_month_string
 
 
 @pytest.fixture(autouse=True)
@@ -62,5 +63,23 @@ def test_is_change_month():
     assert is_change_month(month_string)
 
 
-if __name__ == "__main__":
-    pytest.main()
+def test_is_leaderboard_format():
+    assert is_leaderboard_format("===Leaderboard")
+    assert not is_leaderboard_format("Leaderboard")
+
+
+def test_get_chat_id():
+    # Test case 1: SourceGroup
+    group_id = "group123"
+    group_event = MessageEvent(source=SourceGroup(group_id=group_id))
+    assert get_chat_id(group_event) == group_id
+
+    # Test case 2: SourceRoom
+    room_id = "room456"
+    room_event = MessageEvent(source=SourceRoom(room_id=room_id))
+    assert get_chat_id(room_event) == room_id
+
+    # Test case 3: SourceUser
+    user_id = "user789"
+    user_event = MessageEvent(source=SourceUser(user_id=user_id))
+    assert get_chat_id(user_event) == user_id
