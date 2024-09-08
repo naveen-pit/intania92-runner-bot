@@ -12,7 +12,7 @@ from linebot.exceptions import InvalidSignatureError
 from linebot.models import ImageMessage, MessageEvent, SourceGroup, SourceRoom, TextMessage, TextSendMessage
 from PIL import Image
 
-from running_bot.ocr import get_distance_easyocr
+from running_bot.ocr import extract_distance_from_image
 
 from .cloud_interface import get_leaderboard, get_name, set_leaderboard, set_name
 from .config import cfg
@@ -132,7 +132,7 @@ def handle_image_message(
     name = stored_name["name"]
     message_content = line_bot_api.get_message_content(event.message.id)
     image = Image.open(io.BytesIO(message_content.content))
-    distance = get_distance_easyocr(image)
+    distance = extract_distance_from_image(image)
 
     if distance > 0:
         update_message = f"{name} + {distance}"
