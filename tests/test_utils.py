@@ -1,11 +1,18 @@
 """Test utils functions."""
-
 import datetime
 from typing import Self
 
 import pytest
+from linebot.models import MessageEvent, SourceGroup, SourceRoom, SourceUser
 
-from running_bot.utils import get_current_month, is_change_month, is_valid_month_string
+from running_bot.main import get_chat_id
+from running_bot.utils import (
+    extract_name_and_distance_from_message,
+    get_current_month,
+    is_change_month,
+    is_leaderboard_format,
+    is_valid_month_string,
+)
 
 
 @pytest.fixture(autouse=True)
@@ -62,5 +69,43 @@ def test_is_change_month():
     assert is_change_month(month_string)
 
 
-if __name__ == "__main__":
-    pytest.main()
+@pytest.mark.parametrize(
+    ("messages", "split_symbol", "expected_name", "expected_distance"),
+    [
+        ("John+50", "+", "John", "50"),
+        ("Alice-100", "-", "Alice", "100"),
+        ("Bob+ 30", "+", "Bob", "30"),
+        ("Charlie+50", "+", "Charlie", "50"),
+        ("+50km", "+", None, None),  # Invalid because name is missing
+        ("David +50", "+", "David", "50"),
+        ("Eve-50", "+", None, None),  # Invalid because the split symbol does not match
+        ("Tom-30", "-", "Tom", "30"),
+        ("Tom", "-", None, None),  # Invalid because there is no split symbol
+    ],
+)
+def test_extract_name_and_distance_from_message(messages, split_symbol, expected_name, expected_distance):
+    name, distance = extract_name_and_distance_from_message(messages, split_symbol)
+    assert name == expected_name
+    assert distance == expected_distance
+
+
+def test_is_leaderboard_format():
+    assert is_leaderboard_format("===Leaderboard")
+    assert not is_leaderboard_format("Leaderboard")
+
+
+def test_get_chat_id():
+    # Test case 1: SourceGroup
+    group_id = "group123"
+    group_event = MessageEvent(source=SourceGroup(group_id=group_id))
+    assert get_chat_id(group_event) == group_id
+
+    # Test case 2: SourceRoom
+    room_id = "room456"
+    room_event = MessageEvent(source=SourceRoom(room_id=room_id))
+    assert get_chat_id(room_event) == room_id
+
+    # Test case 3: SourceUser
+    user_id = "user789"
+    user_event = MessageEvent(source=SourceUser(user_id=user_id))
+    assert get_chat_id(user_event) == user_id

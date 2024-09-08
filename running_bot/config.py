@@ -46,6 +46,7 @@ class RunSetting(BaseSettings):
 
     firestore_database: str = "intania92-runner-leaderboard"
     firestore_leaderboard_collection: str = "leaderboard"
+    firestore_user_collection: str = "users"
 
     redis_host: str = ""
     redis_password: SecretStr = SecretStr("")
