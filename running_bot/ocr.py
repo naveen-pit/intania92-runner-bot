@@ -16,7 +16,6 @@ def get_distance_easyocr(image: Image) -> Decimal:
     # Note: easyocr can work directly with numpy arrays, so we'll convert the image to a numpy array
     image_np = np.array(image)
     result = reader.readtext(image_np)
-    print("easy ocr readtext")
     distance_list = []
     prev_text = ""
     for detection in result:
@@ -37,7 +36,6 @@ def get_distance_easyocr(image: Image) -> Decimal:
             except InvalidOperation:
                 return Decimal(0)
         prev_text = text
-    print(f"distance_list:{distance_list}")
     if len(distance_list) == 1:
         return distance_list[0]
     return Decimal(0)

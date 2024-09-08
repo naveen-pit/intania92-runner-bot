@@ -2,15 +2,16 @@
 
 import io
 from decimal import Decimal, InvalidOperation
-from typing import Literal, Optional
+from typing import Literal
 
 import functions_framework
 from flask import Flask, Request
 from flask import request as req
 from linebot import LineBotApi, WebhookParser
 from linebot.exceptions import InvalidSignatureError
-from linebot.models import Event,ImageMessage, MessageEvent, SourceGroup, SourceRoom, TextMessage, TextSendMessage
+from linebot.models import ImageMessage, MessageEvent, SourceGroup, SourceRoom, TextMessage, TextSendMessage
 from PIL import Image
+
 from running_bot.ocr import get_distance_easyocr
 
 from .cloud_interface import get_leaderboard, get_name, set_leaderboard, set_name
@@ -18,15 +19,19 @@ from .config import cfg
 from .google_cloud import Firestore
 from .utils import get_current_month, is_change_month, is_valid_month_string
 
+
 def is_leaderboard_format(text: str) -> bool:
     return text.startswith("===")
 
 
-def parse_stats(message_list: list[str], user: str | None = None, increase_distance: Decimal = Decimal("0")) -> str:
-    skip_rows=2
+def parse_stats(
+    message_list: list[str], user: str | None = None, increase_distance: Decimal | Literal[0] = Decimal("0")
+) -> str:
+    increase_distance = Decimal(increase_distance)
+    skip_rows = 2
     if len(message_list) < skip_rows:
         return "Please set title and subtitle in the following format\n===TITLE \n SUBTITLE"
-    
+
     sorted_list = []
     match_name = False
     for message in message_list[2:]:
@@ -46,9 +51,10 @@ def parse_stats(message_list: list[str], user: str | None = None, increase_dista
     if user and not match_name and increase_distance > 0:
         sorted_list.append((increase_distance, f"{user} {increase_distance} km"))
     sorted_list.sort(key=lambda x: x[0], reverse=True)
-    
-    return_message = "\n".join([message_list[0], message_list[1]] + 
-                               [f"{idx + 1} {value[1]}" for idx, value in enumerate(sorted_list)])
+
+    return_message = "\n".join(
+        [message_list[0], message_list[1]] + [f"{idx + 1} {value[1]}" for idx, value in enumerate(sorted_list)]
+    )
     return return_message.strip()
 
 
@@ -65,18 +71,15 @@ def update_distance_in_database(name: str, distance_string: str, chat_id: str, s
     elements = distance_string.split(symbol)
     if not elements:
         return "Invalid format"
-    
-    # Sum up all the distances
-    total_distance = Decimal(0)
-    
+
     try:
         total_distance = sum(Decimal(distance.strip()) for distance in elements)
     except InvalidOperation:
         return "Error parsing distance"
-    
+
     if symbol == "-":
         total_distance = -total_distance
-    
+
     if total_distance == Decimal(0):
         return None
 
@@ -100,61 +103,78 @@ def update_distance_in_database(name: str, distance_string: str, chat_id: str, s
 def get_chat_id(event: MessageEvent) -> str:
     if isinstance(event.source, SourceGroup):
         return event.source.group_id
-    elif isinstance(event.source, SourceRoom):
+    if isinstance(event.source, SourceRoom):
         return event.source.room_id
     return event.source.user_id
 
 
-
 def process_message_event(event: MessageEvent, line_bot_api: LineBotApi) -> str | None:
-    reply_message_list=[]
+    reply_message_list: list[TextSendMessage] = []
     return_message = None
-    
+
     firestore_client = Firestore(project=cfg.project_id, database=cfg.firestore_database)
     stored_name = get_name(firestore_client, event.source.user_id)
-    
+
     if isinstance(event.message, ImageMessage) and event.message.image_set is None and stored_name:
         return_message = handle_image_message(event, line_bot_api, stored_name, reply_message_list)
     elif isinstance(event.message, TextMessage):
-        return_message = handle_text_message(event,stored_name, reply_message_list)
+        return_message = handle_text_message(event, stored_name, reply_message_list)
     if return_message:
         reply_message_list.append(TextSendMessage(text=return_message))
         line_bot_api.reply_message(event.reply_token, reply_message_list)
-    
-    return return_message  
-    
-def handle_image_message(event: MessageEvent, line_bot_api: LineBotApi, stored_name: dict, reply_message_list: list[TextSendMessage]) -> Optional[str]:
+
+    return return_message
+
+
+def handle_image_message(
+    event: MessageEvent, line_bot_api: LineBotApi, stored_name: dict, reply_message_list: list[TextSendMessage]
+) -> str | None:
     name = stored_name["name"]
     message_content = line_bot_api.get_message_content(event.message.id)
     image = Image.open(io.BytesIO(message_content.content))
     distance = get_distance_easyocr(image)
-    
+
     if distance > 0:
         update_message = f"{name} + {distance}"
         reply_message_list.append(TextSendMessage(text=update_message))
-        return handle_distance_update(update_message, event,stored_name, reply_message_list, "+")
+        return handle_distance_update(update_message, event, stored_name, reply_message_list, "+")
     return None
 
-def handle_text_message(event: MessageEvent, stored_name: Optional[dict],reply_message_list: list) -> Optional[str]:
+
+def handle_text_message(event: MessageEvent, stored_name: dict | None, reply_message_list: list) -> str | None:
     messages = event.message.text.strip()
     if is_leaderboard_format(messages):
         return handle_leaderboard_update(messages, event)
-    elif "+" in messages:
-        return handle_distance_update(messages, event,stored_name, reply_message_list, "+")
-    elif "-" in messages:
-        return handle_distance_update(messages, event,stored_name, reply_message_list, "-")
+    if "+" in messages:
+        return handle_distance_update(messages, event, stored_name, reply_message_list, "+")
+    if "-" in messages:
+        return handle_distance_update(messages, event, stored_name, reply_message_list, "-")
     return None
 
-def handle_distance_update(messages: str, event: MessageEvent,stored_name:Optional[dict],reply_message_list:list[TextSendMessage], split_symbol: Literal["+", "-"]) -> str | None:
+
+def handle_distance_update(
+    messages: str,
+    event: MessageEvent,
+    stored_name: dict | None,
+    reply_message_list: list[TextSendMessage],
+    split_symbol: Literal["+", "-"],
+) -> str | None:
     extracted_name, extracted_distance = extract_name_and_distance_from_message(messages, split_symbol)
-    if not extracted_name or not extracted_distance:
+    if not extracted_name or extracted_name == "" or not extracted_distance:
         return "Name contains space or has invalid format"
-    
+
     if stored_name is None or stored_name["name"] != extracted_name:
         firestore_client = Firestore(project=cfg.project_id, database=cfg.firestore_database)
         set_name(firestore_client, event.source.user_id, name=extracted_name)
-        reply_message_list.append(TextSendMessage(text=f"Your name is set to {extracted_name}\nBot always uses your latest submitted name. To change your name, type 'Name+0'"))
-    
+        reply_message_list.append(
+            TextSendMessage(
+                text=(
+                    f"Your name is set to {extracted_name}\n"
+                    "Bot always uses your latest submitted name. To change your name, type 'Name+0'"
+                )
+            )
+        )
+
     return update_distance_in_database(extracted_name, extracted_distance, get_chat_id(event), split_symbol)
 
 
@@ -208,7 +228,5 @@ def home() -> str:
 
 @app.route("/", methods=["POST"])
 def callback() -> str:
-    print("callback")
     main(req)
-    print("done")
     return "OK"
