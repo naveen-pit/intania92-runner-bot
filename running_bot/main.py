@@ -17,7 +17,14 @@ from running_bot.ocr import extract_distance_from_image
 from .cloud_interface import get_leaderboard, get_name, set_leaderboard, set_name
 from .config import cfg
 from .google_cloud import Firestore
-from .utils import get_chat_id, get_current_month, is_change_month, is_leaderboard_format, is_valid_month_string
+from .utils import (
+    extract_name_and_distance_from_message,
+    get_chat_id,
+    get_current_month,
+    is_change_month,
+    is_leaderboard_format,
+    is_valid_month_string,
+)
 
 
 def parse_stats(
@@ -164,16 +171,6 @@ def handle_distance_update(
         )
 
     return update_distance_in_database(extracted_name, extracted_distance, get_chat_id(event), split_symbol)
-
-
-def extract_name_and_distance_from_message(
-    messages: str, split_symbol: Literal["+", "-"]
-) -> tuple[str | None, str | None]:
-    elements = messages.split(split_symbol, 1)
-    valid_length = 2
-    if len(elements) != valid_length or not elements[0].strip() or " " in elements[0].strip():
-        return None, None
-    return elements[0].strip(), elements[1]
 
 
 @functions_framework.http

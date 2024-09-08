@@ -2,9 +2,10 @@
 
 from decimal import Decimal
 
-from linebot.models import MessageEvent, SourceGroup, SourceRoom, SourceUser, TextMessage
+from linebot.models import MessageEvent, SourceGroup, SourceRoom, SourceUser, TextMessage, TextSendMessage
 
 from running_bot.main import (
+    handle_distance_update,
     handle_leaderboard_update,
     parse_stats,
     process_message_event,
@@ -247,6 +248,54 @@ def test_handle_distance_invalid_month(mocker):
 
     expected_output = "===Running Challenge===\nJuly\n1 Jane 10 km\n2 John 8 km"
     assert update_distance_in_database(name, distance_string, chat_id, "+") == expected_output
+
+
+def test_handle_distance_update_invalid_name_format(mocker):
+    reply_message_list = []
+    mock_event = MessageEvent(message=TextMessage(text="===Leaderboard"), source=SourceUser(user_id="user_id"))
+    # Mock extract_name_and_distance_from_message to return None values
+    mocker.patch("running_bot.utils.extract_name_and_distance_from_message", return_value=(None, None))
+
+    response = handle_distance_update("InvalidMessage", mock_event, None, reply_message_list, "+")
+
+    assert response == "Name contains space or has invalid format"
+
+
+def test_handle_distance_update_new_name(mocker):
+    reply_message_list = []
+    mock_event = MessageEvent(message=TextMessage(text="===Leaderboard"), source=SourceUser(user_id="user_id"))
+    # Mock the necessary functions and classes
+    mocker.patch("running_bot.utils.extract_name_and_distance_from_message", return_value=("John", "50km"))
+    mocker.patch("running_bot.utils.get_chat_id", return_value="mock_chat_id")
+    mocker.patch("running_bot.main.update_distance_in_database", return_value="Distance updated")
+    mocker.patch("running_bot.google_cloud.Firestore.__init__", return_value=None)
+    mocker.patch("running_bot.main.set_name")
+
+    # Call the function with a new name (no stored name)
+    response = handle_distance_update("John+50km", mock_event, None, reply_message_list, "+")
+
+    assert len(reply_message_list) == 1
+    assert isinstance(reply_message_list[0], TextSendMessage)
+    assert "Your name is set to John" in reply_message_list[0].text
+    assert response == "Distance updated"
+
+
+def test_handle_distance_update_existing_name(mocker):
+    reply_message_list = []
+    mock_event = MessageEvent(message=TextMessage(text="===Leaderboard"), source=SourceUser(user_id="user_id"))
+    # Mock the necessary functions and classes
+    mocker.patch("running_bot.utils.extract_name_and_distance_from_message", return_value=("John", "50km"))
+    mocker.patch("running_bot.utils.get_chat_id", return_value="mock_chat_id")
+    mocker.patch("running_bot.main.update_distance_in_database", return_value="Distance updated")
+
+    # Call the function with a matching stored name
+    stored_name = {"name": "John"}
+    response = handle_distance_update("John+50", mock_event, stored_name, reply_message_list, "+")
+
+    # Check that set_name was not called because the stored name matches
+    assert len(reply_message_list) == 0
+    mocker.patch("running_bot.main.set_name").assert_not_called()
+    assert response == "Distance updated"
 
 
 def test_process_message_event_with_leaderboard_input(mocker):

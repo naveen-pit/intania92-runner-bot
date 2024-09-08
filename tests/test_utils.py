@@ -6,7 +6,13 @@ import pytest
 from linebot.models import MessageEvent, SourceGroup, SourceRoom, SourceUser
 
 from running_bot.main import get_chat_id
-from running_bot.utils import get_current_month, is_change_month, is_leaderboard_format, is_valid_month_string
+from running_bot.utils import (
+    extract_name_and_distance_from_message,
+    get_current_month,
+    is_change_month,
+    is_leaderboard_format,
+    is_valid_month_string,
+)
 
 
 @pytest.fixture(autouse=True)
@@ -61,6 +67,26 @@ def test_is_change_month():
     # Test when the month has changed
     month_string = "June 2024"
     assert is_change_month(month_string)
+
+
+@pytest.mark.parametrize(
+    ("messages", "split_symbol", "expected_name", "expected_distance"),
+    [
+        ("John+50", "+", "John", "50"),
+        ("Alice-100", "-", "Alice", "100"),
+        ("Bob+ 30", "+", "Bob", "30"),
+        ("Charlie+50", "+", "Charlie", "50"),
+        ("+50km", "+", None, None),  # Invalid because name is missing
+        ("David +50", "+", "David", "50"),
+        ("Eve-50", "+", None, None),  # Invalid because the split symbol does not match
+        ("Tom-30", "-", "Tom", "30"),
+        ("Tom", "-", None, None),  # Invalid because there is no split symbol
+    ],
+)
+def test_extract_name_and_distance_from_message(messages, split_symbol, expected_name, expected_distance):
+    name, distance = extract_name_and_distance_from_message(messages, split_symbol)
+    assert name == expected_name
+    assert distance == expected_distance
 
 
 def test_is_leaderboard_format():

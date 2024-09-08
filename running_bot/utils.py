@@ -1,6 +1,7 @@
 """Utility functions."""
 
 import datetime
+from typing import Literal
 
 from linebot.models import MessageEvent, SourceGroup, SourceRoom
 
@@ -16,6 +17,16 @@ def is_valid_month_string(input_string: str, date_format: str = "%B %Y") -> bool
         return False
     else:
         return True
+
+
+def extract_name_and_distance_from_message(
+    messages: str, split_symbol: Literal["+", "-"]
+) -> tuple[str | None, str | None]:
+    elements = messages.split(split_symbol, 1)
+    valid_length = 2
+    if len(elements) != valid_length or not elements[0].strip() or " " in elements[0].strip():
+        return None, None
+    return elements[0].strip(), elements[1].strip()
 
 
 def is_change_month(month_string: str) -> bool:
