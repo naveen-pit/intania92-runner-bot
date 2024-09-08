@@ -6,16 +6,16 @@ from linebot.models import MessageEvent, SourceGroup, SourceRoom, SourceUser, Te
 
 from running_bot.main import (
     handle_leaderboard_update,
-    is_leaderboard_input,
+    is_leaderboard_format,
     parse_stats,
-    process_event,
+    process_message_event,
     update_distance_in_database,
 )
 
 
 def test_is_leaderboard_input():
-    assert is_leaderboard_input("===Leaderboard")
-    assert not is_leaderboard_input("Leaderboard")
+    assert is_leaderboard_format("===Leaderboard")
+    assert not is_leaderboard_format("Leaderboard")
 
 
 def test_parse_stats():
@@ -250,7 +250,7 @@ def test_process_event_with_leaderboard_input(mocker):
 
     mock_event = MessageEvent(message=TextMessage(text="===Leaderboard"), source=SourceUser(user_id="user_id"))
 
-    result = process_event(mock_event, mock_line_bot_api)
+    result = process_message_event(mock_event, mock_line_bot_api)
 
     assert result == "Leaderboard updated"
 
@@ -262,7 +262,7 @@ def test_process_event_with_distance_update(mocker):
 
     mock_event = MessageEvent(message=TextMessage(text="John +5"), source=SourceUser(user_id="user_id"))
 
-    result = process_event(mock_event, mock_line_bot_api)
+    result = process_message_event(mock_event, mock_line_bot_api)
 
     assert result == "Distance updated"
 
@@ -274,7 +274,7 @@ def test_process_event_with_negative_distance_update(mocker):
 
     mock_event = MessageEvent(message=TextMessage(text="John -5"), source=SourceUser(user_id="user_id"))
 
-    result = process_event(mock_event, mock_line_bot_api)
+    result = process_message_event(mock_event, mock_line_bot_api)
 
     assert result == "Distance updated"
 
@@ -284,7 +284,7 @@ def test_process_event_with_non_text_message(mocker):
 
     mock_event = MessageEvent(message=None, source=SourceUser(user_id="user_id"))
 
-    result = process_event(mock_event, mock_line_bot_api)
+    result = process_message_event(mock_event, mock_line_bot_api)
 
     assert result is None
 
@@ -297,7 +297,7 @@ def test_process_event_with_non_message_event(mocker):
 
     mock_event = DummyEvent()
 
-    result = process_event(mock_event, mock_line_bot_api)
+    result = process_message_event(mock_event, mock_line_bot_api)
 
     assert result is None
 
@@ -309,7 +309,7 @@ def test_process_event_with_group_source(mocker):
 
     mock_event = MessageEvent(message=TextMessage(text="===Leaderboard"), source=SourceGroup(group_id="group_id"))
 
-    result = process_event(mock_event, mock_line_bot_api)
+    result = process_message_event(mock_event, mock_line_bot_api)
 
     assert result == "Leaderboard updated"
 
@@ -321,6 +321,6 @@ def test_process_event_with_room_source(mocker):
 
     mock_event = MessageEvent(message=TextMessage(text="===Leaderboard"), source=SourceRoom(room_id="room_id"))
 
-    result = process_event(mock_event, mock_line_bot_api)
+    result = process_message_event(mock_event, mock_line_bot_api)
 
     assert result == "Leaderboard updated"
