@@ -195,7 +195,13 @@ You can add as many distances as you need, as long as distance are numbers.
 - This will add or update the distance associated with your name on the leaderboard.
 
 To subtract distance from the leaderboard, put negative number in the distance
-- Example: `John+-5.2`
+- Example: `John-5.2`
+- This will subtract the distance associated with your name on the leaderboard.
+- User whose distance is <= 0 will be removed from the leaderboard
+
+You can also subtract as many distances as you need, as long as distance are numbers. 
+- Format: `<Your Name>-<Distance>-<Distance>+...`
+- Example: `John-5.2-2-4`
 - This will subtract the distance associated with your name on the leaderboard.
 - User whose distance is <= 0 will be removed from the leaderboard
 
