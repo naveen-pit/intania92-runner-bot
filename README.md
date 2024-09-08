@@ -34,6 +34,7 @@ flowchart LR
 ├── cloud_interface.py    # Interfaces for handling google cloud operations
 ├── config.py             # Configuration file for setting up project-specific settings
 ├── google_cloud.py       # Google Cloud Firestore and Secret client setup
+├── ocr.py                # Handle distance extraction from image (OCR algorithm)
 ├── utils.py              # Utility functions for date handling and month changes
 ├── cloudbuild.yaml       # Google Cloud Build configuration for deployment
 ├── Makefile              # Makefile for setting up and running the project
@@ -109,7 +110,7 @@ steps:
   - --trigger-http
   - --source=running_bot/.
   - --entry-point=reply
-  - --memory=512MB
+  - --memory=1GB
   - --runtime=python311
   - --set-secrets=LINEBOT_LINE_ACCESS_TOKEN=line-channel-access-token:latest,LINEBOT_LINE_CHANNEL_SECRET_KEY=line-channel-secret:latest
 options:

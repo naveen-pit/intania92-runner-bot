@@ -163,7 +163,7 @@ def handle_distance_update(
         reply_message_list.append(
             TextSendMessage(
                 text=(
-                    f"Your name is set to {extracted_name}\n"
+                    f"Your name is set to {extracted_name}.\n"
                     "Bot always uses your latest submitted name. To change your name, type 'Name+0'"
                 )
             )
