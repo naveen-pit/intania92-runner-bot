@@ -12,11 +12,10 @@ from linebot.exceptions import InvalidSignatureError
 from linebot.models import ImageMessage, MessageEvent, TextMessage, TextSendMessage
 from PIL import Image
 
-from running_bot.ocr import extract_distance_from_image
-
 from .cloud_interface import get_leaderboard, get_name, set_leaderboard, set_name
 from .config import cfg
 from .google_cloud import Firestore
+from .ocr import extract_distance_from_image
 from .utils import (
     extract_name_and_distance_from_message,
     get_chat_id,
