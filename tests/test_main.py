@@ -2,7 +2,7 @@
 
 from decimal import Decimal
 
-from linebot.models import MessageEvent, SourceGroup, SourceRoom, SourceUser, TextMessage, TextSendMessage
+from linebot.models import ImageMessage, MessageEvent, SourceGroup, SourceRoom, SourceUser, TextMessage, TextSendMessage
 
 from running_bot.main import (
     handle_distance_update,
@@ -399,3 +399,31 @@ def test_process_event_with_room_source(mocker):
     result = process_message_event(mock_event, mock_line_bot_api)
 
     assert result == [TextSendMessage(text="Updated Leaderboard")]
+
+
+def test_process_event_with_image_message(mocker):
+    mocker.patch("running_bot.main.is_leaderboard_format", return_value=True)
+    mocker.patch("running_bot.main.handle_leaderboard_update", return_value="Updated Leaderboard")
+    mocker.patch("running_bot.google_cloud.Firestore.__init__", return_value=None)
+    mocker.patch("running_bot.main.get_name", return_value={"name": "John"})
+    mock_line_bot_api = mocker.patch("running_bot.main.LineBotApi")
+
+    mock_event = MessageEvent(message=ImageMessage(), source=SourceRoom(room_id="room_id"))
+
+    result = process_message_event(mock_event, mock_line_bot_api)
+
+    assert result == []
+
+
+def test_process_event_with_image_set_message(mocker):
+    mocker.patch("running_bot.main.is_leaderboard_format", return_value=True)
+    mocker.patch("running_bot.main.handle_leaderboard_update", return_value="Updated Leaderboard")
+    mocker.patch("running_bot.google_cloud.Firestore.__init__", return_value=None)
+    mocker.patch("running_bot.main.get_name", return_value={"name": "John"})
+    mock_line_bot_api = mocker.patch("running_bot.main.LineBotApi")
+
+    mock_event = MessageEvent(message=ImageMessage(image_set={"id": "image_id"}), source=SourceRoom(room_id="room_id"))
+
+    result = process_message_event(mock_event, mock_line_bot_api)
+
+    assert result == []

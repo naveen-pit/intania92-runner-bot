@@ -1,4 +1,4 @@
-"""Functions to retreive inputs."""
+"""Functions to retrieve inputs."""
 
 from datetime import timedelta
 

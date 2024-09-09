@@ -1,4 +1,4 @@
-"""Google Cloud clients for services (BigQuery)."""
+"""Google Cloud clients."""
 
 import datetime
 from datetime import timedelta
