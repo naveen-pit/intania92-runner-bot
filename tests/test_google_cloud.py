@@ -1,4 +1,5 @@
 """Test google cloud client."""
+import datetime
 from unittest.mock import MagicMock, patch
 
 from google.cloud import firestore
@@ -96,3 +97,45 @@ def test_get_document_not_found(mock_firestore_client):
     mock_collection.document.assert_called_once_with(document)
     mock_document.get.assert_called_once_with()
     assert result is None
+
+
+@patch("running_bot.google_cloud.firestore.Client")
+def test_set_value_with_expiration_delta(mock_firestore_client):
+    mock_doc = MagicMock()
+    mock_firestore_client.return_value.collection.return_value.document.return_value = mock_doc
+
+    firestore_client = Firestore(project="project_id", database="database")
+    expiration_delta = datetime.timedelta(hours=1)
+    value = {"field": "value"}
+
+    firestore_client.set_value(
+        collection="test_collection", document="test_document", value=value, expiration_delta=expiration_delta
+    )
+
+    # Check if the set method was called with the correct value
+    expected_expiration = datetime.datetime.now(datetime.UTC) + expiration_delta
+    # Allow for some time difference
+    assert "expired_at" in mock_doc.set.call_args[0][0]
+    assert mock_doc.set.call_args[0][0]["expired_at"] >= expected_expiration - datetime.timedelta(seconds=10)
+    assert mock_doc.set.call_args[0][0]["expired_at"] <= expected_expiration + datetime.timedelta(seconds=10)
+
+
+@patch("running_bot.google_cloud.firestore.Client")
+def test_upsert_value_with_expiration_delta(mock_firestore_client):
+    mock_doc = MagicMock()
+    mock_firestore_client.return_value.collection.return_value.document.return_value = mock_doc
+
+    firestore_client = Firestore(project="project_id", database="database")
+    expiration_delta = datetime.timedelta(hours=1)
+    value = {"field": "value"}
+
+    firestore_client.upsert_value(
+        collection="test_collection", document="test_document", value=value, expiration_delta=expiration_delta
+    )
+
+    # Check if the upsert method was called with the correct value
+    expected_expiration = datetime.datetime.now(datetime.UTC) + expiration_delta
+    # Allow for some time difference
+    assert "expired_at" in mock_doc.set.call_args[0][0]
+    assert mock_doc.set.call_args[0][0]["expired_at"] >= expected_expiration - datetime.timedelta(seconds=10)
+    assert mock_doc.set.call_args[0][0]["expired_at"] <= expected_expiration + datetime.timedelta(seconds=10)
