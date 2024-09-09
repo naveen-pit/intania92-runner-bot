@@ -12,7 +12,14 @@ from linebot.exceptions import InvalidSignatureError
 from linebot.models import ImageMessage, MessageEvent, TextMessage, TextSendMessage
 from PIL import Image
 
-from .cloud_interface import get_leaderboard, get_name, set_leaderboard, set_name
+from .cloud_interface import (
+    get_image_queue,
+    get_leaderboard,
+    get_name,
+    set_leaderboard,
+    set_name,
+    upsert_image_queue,
+)
 from .config import cfg
 from .google_cloud import Firestore
 from .ocr import extract_distance_from_image
@@ -102,7 +109,7 @@ def update_distance_in_database(name: str, distance_string: str, chat_id: str, s
     return return_message
 
 
-def process_message_event(event: MessageEvent, line_bot_api: LineBotApi) -> str | None:
+def process_message_event(event: MessageEvent, line_bot_api: LineBotApi) -> list[TextSendMessage]:
     reply_message_list: list[TextSendMessage] = []
     return_message = None
 
@@ -118,9 +125,10 @@ def process_message_event(event: MessageEvent, line_bot_api: LineBotApi) -> str 
         return_message = handle_text_message(event, stored_name, reply_message_list)
     if return_message:
         reply_message_list.append(TextSendMessage(text=return_message))
+    if len(reply_message_list) > 0:
         line_bot_api.reply_message(event.reply_token, reply_message_list)
 
-    return return_message
+    return reply_message_list
 
 
 def handle_single_image_message(
@@ -141,19 +149,31 @@ def handle_single_image_message(
 def handle_image_set_message(
     event: MessageEvent, line_bot_api: LineBotApi, stored_name: dict, reply_message_list: list[TextSendMessage]
 ) -> str | None:
+    image_set_id = event.message.image_set.id
     current_index = event.message.image_set.index
     image_count = event.message.image_set.total
+
     name = stored_name["name"]
     message_content = line_bot_api.get_message_content(event.message.id)
     image = Image.open(io.BytesIO(message_content.content))
     distance = extract_distance_from_image(image)
 
-    update_message = f"{name} + {distance}"
-    leaderboard = handle_distance_update(update_message, event, stored_name, reply_message_list, "+")
+    firestore_client = Firestore(project=cfg.project_id, database=cfg.firestore_database)
     if current_index == image_count:
-        reply_message_list.append(TextSendMessage(text=update_message))
-        return leaderboard
-    return update_message
+        # For the last image, update the distance in database and send all distances.
+        image_queue = get_image_queue(firestore_client, image_set_id)
+        if image_queue:
+            distance_text = f"{name} +"
+            # loop image queue until the one before the last
+            for i in range(image_count - 1):
+                distance_text += f" {image_queue.get(str(i+1),'0')} +"
+            distance_text += f" {distance}"
+            reply_message_list.append(TextSendMessage(text=distance_text))
+        return handle_distance_update(distance_text, event, stored_name, reply_message_list, "+")
+
+    # For other images, update distance in the image queue.
+    upsert_image_queue(firestore_client, image_set_id, key=str(current_index), value=str(distance))
+    return None
 
 
 def handle_text_message(event: MessageEvent, stored_name: dict | None, reply_message_list: list) -> str | None:

@@ -265,19 +265,19 @@ def test_handle_distance_update_new_name(mocker):
     reply_message_list = []
     mock_event = MessageEvent(message=TextMessage(text="===Leaderboard"), source=SourceUser(user_id="user_id"))
     # Mock the necessary functions and classes
-    mocker.patch("running_bot.utils.extract_name_and_distance_from_message", return_value=("John", "50km"))
+    mocker.patch("running_bot.utils.extract_name_and_distance_from_message", return_value=("John", "50"))
     mocker.patch("running_bot.utils.get_chat_id", return_value="mock_chat_id")
-    mocker.patch("running_bot.main.update_distance_in_database", return_value="Distance updated")
+    mocker.patch("running_bot.main.update_distance_in_database", return_value="Updated Leaderboard")
     mocker.patch("running_bot.google_cloud.Firestore.__init__", return_value=None)
     mocker.patch("running_bot.main.set_name")
 
     # Call the function with a new name (no stored name)
-    response = handle_distance_update("John+50km", mock_event, None, reply_message_list, "+")
+    response = handle_distance_update("John+50", mock_event, None, reply_message_list, "+")
 
     assert len(reply_message_list) == 1
     assert isinstance(reply_message_list[0], TextSendMessage)
     assert "Your name is set to John" in reply_message_list[0].text
-    assert response == "Distance updated"
+    assert response == "Updated Leaderboard"
 
 
 def test_handle_distance_update_existing_name(mocker):
@@ -286,7 +286,7 @@ def test_handle_distance_update_existing_name(mocker):
     # Mock the necessary functions and classes
     mocker.patch("running_bot.utils.extract_name_and_distance_from_message", return_value=("John", "50km"))
     mocker.patch("running_bot.utils.get_chat_id", return_value="mock_chat_id")
-    mocker.patch("running_bot.main.update_distance_in_database", return_value="Distance updated")
+    mocker.patch("running_bot.main.update_distance_in_database", return_value="Updated Leaderboard")
 
     # Call the function with a matching stored name
     stored_name = {"name": "John"}
@@ -295,12 +295,12 @@ def test_handle_distance_update_existing_name(mocker):
     # Check that set_name was not called because the stored name matches
     assert len(reply_message_list) == 0
     mocker.patch("running_bot.main.set_name").assert_not_called()
-    assert response == "Distance updated"
+    assert response == "Updated Leaderboard"
 
 
 def test_process_message_event_with_leaderboard_input(mocker):
     mocker.patch("running_bot.main.is_leaderboard_format", return_value=True)
-    mocker.patch("running_bot.main.handle_leaderboard_update", return_value="Leaderboard updated")
+    mocker.patch("running_bot.main.handle_leaderboard_update", return_value="Updated Leaderboard")
     mocker.patch("running_bot.google_cloud.Firestore.__init__", return_value=None)
     mocker.patch("running_bot.main.get_name", return_value={"name": "John"})
     mock_line_bot_api = mocker.patch("running_bot.main.LineBotApi")
@@ -309,12 +309,12 @@ def test_process_message_event_with_leaderboard_input(mocker):
 
     result = process_message_event(mock_event, mock_line_bot_api)
 
-    assert result == "Leaderboard updated"
+    assert result == [TextSendMessage(text="Updated Leaderboard")]
 
 
 def test_process_message_event_with_distance_update(mocker):
     mocker.patch("running_bot.main.is_leaderboard_format", return_value=False)
-    mocker.patch("running_bot.main.handle_distance_update", return_value="Distance updated")
+    mocker.patch("running_bot.main.handle_distance_update", return_value="Updated Leaderboard")
     mocker.patch("running_bot.google_cloud.Firestore.__init__", return_value=None)
     mocker.patch("running_bot.main.get_name", return_value={"name": "John"})
     mock_line_bot_api = mocker.patch("running_bot.main.LineBotApi")
@@ -323,12 +323,12 @@ def test_process_message_event_with_distance_update(mocker):
 
     result = process_message_event(mock_event, mock_line_bot_api)
 
-    assert result == "Distance updated"
+    assert result == [TextSendMessage(text="Updated Leaderboard")]
 
 
-def test_process__message_event_with_negative_distance_update(mocker):
+def test_process_message_event_with_negative_distance_update(mocker):
     mocker.patch("running_bot.main.is_leaderboard_format", return_value=False)
-    mocker.patch("running_bot.main.handle_distance_update", return_value="Distance updated")
+    mocker.patch("running_bot.main.handle_distance_update", return_value="Updated Leaderboard")
     mocker.patch("running_bot.google_cloud.Firestore.__init__", return_value=None)
     mocker.patch("running_bot.main.get_name", return_value={"name": "John"})
     mock_line_bot_api = mocker.patch("running_bot.main.LineBotApi")
@@ -337,7 +337,29 @@ def test_process__message_event_with_negative_distance_update(mocker):
 
     result = process_message_event(mock_event, mock_line_bot_api)
 
-    assert result == "Distance updated"
+    assert result == [TextSendMessage(text="Updated Leaderboard")]
+
+
+def test_process_message_event_with_zero_distance(mocker):
+    mocker.patch("running_bot.main.is_leaderboard_format", return_value=False)
+    mocker.patch("running_bot.google_cloud.Firestore.__init__", return_value=None)
+    mocker.patch("running_bot.main.get_name", return_value={"name": "John"})
+    mocker.patch("running_bot.main.set_name")
+
+    mock_line_bot_api = mocker.patch("running_bot.main.LineBotApi")
+
+    mock_event = MessageEvent(message=TextMessage(text="Bob +0"), source=SourceUser(user_id="user_id"))
+
+    result = process_message_event(mock_event, mock_line_bot_api)
+
+    assert result == [
+        TextSendMessage(
+            text=(
+                "Your name is set to Bob\n"
+                "Bot always uses your latest submitted name. To change your name, type 'Name+0'"
+            )
+        )
+    ]
 
 
 def test_process_message_event_with_non_text_message(mocker):
@@ -348,12 +370,12 @@ def test_process_message_event_with_non_text_message(mocker):
 
     result = process_message_event(mock_event, mock_line_bot_api)
 
-    assert result is None
+    assert result == []
 
 
 def test_process_event_with_group_source(mocker):
     mocker.patch("running_bot.main.is_leaderboard_format", return_value=True)
-    mocker.patch("running_bot.main.handle_leaderboard_update", return_value="Leaderboard updated")
+    mocker.patch("running_bot.main.handle_leaderboard_update", return_value="Updated Leaderboard")
     mocker.patch("running_bot.google_cloud.Firestore.__init__", return_value=None)
     mocker.patch("running_bot.main.get_name", return_value={"name": "John"})
     mock_line_bot_api = mocker.patch("running_bot.main.LineBotApi")
@@ -362,12 +384,12 @@ def test_process_event_with_group_source(mocker):
 
     result = process_message_event(mock_event, mock_line_bot_api)
 
-    assert result == "Leaderboard updated"
+    assert result == [TextSendMessage(text="Updated Leaderboard")]
 
 
 def test_process_event_with_room_source(mocker):
     mocker.patch("running_bot.main.is_leaderboard_format", return_value=True)
-    mocker.patch("running_bot.main.handle_leaderboard_update", return_value="Leaderboard updated")
+    mocker.patch("running_bot.main.handle_leaderboard_update", return_value="Updated Leaderboard")
     mocker.patch("running_bot.google_cloud.Firestore.__init__", return_value=None)
     mocker.patch("running_bot.main.get_name", return_value={"name": "John"})
     mock_line_bot_api = mocker.patch("running_bot.main.LineBotApi")
@@ -376,4 +398,4 @@ def test_process_event_with_room_source(mocker):
 
     result = process_message_event(mock_event, mock_line_bot_api)
 
-    assert result == "Leaderboard updated"
+    assert result == [TextSendMessage(text="Updated Leaderboard")]
