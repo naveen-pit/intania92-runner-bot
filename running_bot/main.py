@@ -109,8 +109,11 @@ def process_message_event(event: MessageEvent, line_bot_api: LineBotApi) -> str 
     firestore_client = Firestore(project=cfg.project_id, database=cfg.firestore_database)
     stored_name = get_name(firestore_client, event.source.user_id)
 
-    if isinstance(event.message, ImageMessage) and event.message.image_set is None and stored_name:
-        return_message = handle_image_message(event, line_bot_api, stored_name, reply_message_list)
+    if isinstance(event.message, ImageMessage) and stored_name and event.source.user_id:
+        if event.message.image_set is None:
+            return_message = handle_single_image_message(event, line_bot_api, stored_name, reply_message_list)
+        else:
+            return_message = handle_image_set_message(event, line_bot_api, stored_name, reply_message_list)
     elif isinstance(event.message, TextMessage):
         return_message = handle_text_message(event, stored_name, reply_message_list)
     if return_message:
@@ -120,7 +123,7 @@ def process_message_event(event: MessageEvent, line_bot_api: LineBotApi) -> str 
     return return_message
 
 
-def handle_image_message(
+def handle_single_image_message(
     event: MessageEvent, line_bot_api: LineBotApi, stored_name: dict, reply_message_list: list[TextSendMessage]
 ) -> str | None:
     name = stored_name["name"]
@@ -133,6 +136,24 @@ def handle_image_message(
         reply_message_list.append(TextSendMessage(text=update_message))
         return handle_distance_update(update_message, event, stored_name, reply_message_list, "+")
     return None
+
+
+def handle_image_set_message(
+    event: MessageEvent, line_bot_api: LineBotApi, stored_name: dict, reply_message_list: list[TextSendMessage]
+) -> str | None:
+    current_index = event.message.image_set.index
+    image_count = event.message.image_set.total
+    name = stored_name["name"]
+    message_content = line_bot_api.get_message_content(event.message.id)
+    image = Image.open(io.BytesIO(message_content.content))
+    distance = extract_distance_from_image(image)
+
+    update_message = f"{name} + {distance}"
+    leaderboard = handle_distance_update(update_message, event, stored_name, reply_message_list, "+")
+    if current_index == image_count:
+        reply_message_list.append(TextSendMessage(text=update_message))
+        return leaderboard
+    return update_message
 
 
 def handle_text_message(event: MessageEvent, stored_name: dict | None, reply_message_list: list) -> str | None:
@@ -157,7 +178,7 @@ def handle_distance_update(
     if not extracted_name or extracted_name == "" or not extracted_distance:
         return "Name contains space or has invalid format"
 
-    if stored_name is None or stored_name["name"] != extracted_name:
+    if (stored_name is None or stored_name["name"] != extracted_name) and event.source.user_id:
         firestore_client = Firestore(project=cfg.project_id, database=cfg.firestore_database)
         set_name(firestore_client, event.source.user_id, name=extracted_name)
         reply_message_list.append(

@@ -23,6 +23,7 @@ class Firestore:
         self.client = firestore.Client(project=project, database=database)
 
     def set_value(self: Self, collection: str, document: str, value: dict) -> None:
+        value["updated_at"] = firestore.SERVER_TIMESTAMP  # Add update timestamp
         self.client.collection(collection).document(document).set(value)
 
     def get_document(self: Self, collection: str, document: str) -> dict | None:
