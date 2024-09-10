@@ -162,13 +162,17 @@ def handle_image_set_message(
     if current_index == image_count:
         # For the last image, update the distance in database and send all distances.
         image_queue = get_image_queue(firestore_client, image_set_id)
+        distance_text = f"{name} +"
+
         if image_queue:
-            distance_text = f"{name} +"
             # loop image queue until the one before the last
             for i in range(image_count - 1):
                 distance_text += f" {image_queue.get(str(i+1),'0')} +"
-            distance_text += f" {distance}"
-            reply_message_list.append(TextSendMessage(text=distance_text))
+        else:
+            # If image queue was not initialized for this image set, set all previous results to zero.
+            distance_text = f"{name} + " + "0 +" * (image_count - 1)
+        distance_text += f" {distance}"
+        reply_message_list.append(TextSendMessage(text=distance_text))
         return handle_distance_update(distance_text, event, stored_name, reply_message_list, "+")
 
     # For other images, update distance in the image queue.
@@ -204,7 +208,7 @@ def handle_distance_update(
         reply_message_list.append(
             TextSendMessage(
                 text=(
-                    f"Your name is set to {extracted_name}\n"
+                    f"Your name is set to {extracted_name}.\n"
                     "Bot always uses your latest submitted name. To change your name, type 'Name+0'"
                 )
             )

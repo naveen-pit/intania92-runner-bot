@@ -357,7 +357,7 @@ def test_process_message_event_with_zero_distance(mocker):
     assert result == [
         TextSendMessage(
             text=(
-                "Your name is set to Bob\n"
+                "Your name is set to Bob.\n"
                 "Bot always uses your latest submitted name. To change your name, type 'Name+0'"
             )
         )
@@ -560,4 +560,33 @@ def test_handle_image_set_message_last_image_with_missing_data(mocker):
     assert result is not None
     assert len(reply_message_list) == 1
     assert reply_message_list[0].text == "John + 5 + 0 + 10"
+    get_image_queue.assert_called_once()
+
+
+def test_handle_image_set_message_last_image_with_missing_queue(mocker):
+    mock_leaderboard = "===TITLE\nSUBTITLE\n1 John 5\n2 Jane 10"
+    mocker.patch("running_bot.main.io.BytesIO")
+    mocker.patch("running_bot.main.Image.open")
+    mocker.patch("running_bot.main.LineBotApi.get_message_content")
+    mocker.patch("running_bot.main.extract_distance_from_image", return_value=Decimal("10"))
+    mocker.patch("running_bot.google_cloud.Firestore.__init__", return_value=None)
+    mocker.patch("running_bot.main.get_leaderboard", return_value={"stats": mock_leaderboard})
+    mocker.patch("running_bot.main.set_leaderboard")
+
+    get_image_queue = mocker.patch("running_bot.main.get_image_queue", return_value=None)
+
+    stored_name = {"name": "John"}
+
+    mock_event = MessageEvent(
+        message=ImageMessage(image_set={"id": "image_id", "index": 2, "total": 2}),
+        source=SourceRoom(room_id="room_id", user_id="user_id"),
+    )
+
+    reply_message_list = []
+
+    result = handle_image_set_message(mock_event, mocker.Mock(), stored_name, reply_message_list)
+
+    assert result is not None
+    assert len(reply_message_list) == 1
+    assert reply_message_list[0].text == "John + 0 + 10"
     get_image_queue.assert_called_once()
