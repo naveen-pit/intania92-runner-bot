@@ -4,8 +4,6 @@
 
 LINE Bot for tracking running distance leaderboard in LINE group
 
-<img src="./images/demo.gif" alt="demo"/>
-
 ## Overview
 This project is a LINE Bot designed to facilitate a running challenge leaderboard among participants on LINE platform. The bot allows users to submit their running distances, updates a leaderboard, and handles image-based distance submissions through OCR algorithm. It is built using Flask, Google Cloud Firestore, and LINE Messaging API.
 
@@ -267,3 +265,16 @@ Week1
 2 John 10 km
 ```
 NOTE: Once you change the subtitle apart from full month name followed by the year (e.g., August 2024), the bot will no longer reset the leaderboard monthly.
+
+### Demo
+This demo illustrates how to set up a LINE chat environment quickly. Follow these steps:
+
+**1. Initialize the Leaderboard:** Begin by adding a distance for a user, for example, `Naveen+8.01.`
+
+**2. Registration Confirmation:** Upon adding the distance, the name `Naveen` is registered under the current account, and the leaderboard is updated accordingly.
+
+**3. Updating via Images:** Send a valid image containing distance information to the bot. The bot automatically updates the leaderboard for the current account.
+
+**4. Batch Image Processing:** Users can upload multiple images. The bot extracts and updates distances from all valid images, consolidating the results in the leaderboard.
+
+<img src="./images/demo.gif" alt="demo"/>
