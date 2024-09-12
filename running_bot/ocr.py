@@ -16,10 +16,8 @@ def extract_distance_from_image(image_path: str) -> Decimal:
     prev_text = ""
     if result:
         for detection in result:
-            text: str = detection[1]
-            text = text.strip().lower()
-            text = text.replace("/km", "")
-            text = text.replace("km/", "")
+            text = detection[1].strip().lower().replace("/km", "").replace("km/", "")
+
             # if contain only km, the distance might be in previous text.
             if text == "km":
                 text = prev_text + text
@@ -30,7 +28,7 @@ def extract_distance_from_image(image_path: str) -> Decimal:
                     parsed_distance = Decimal(distance)
                     distance_list.append(parsed_distance)
                 except InvalidOperation:
-                    return Decimal(0)
+                    pass
             prev_text = text
         if len(distance_list) == 1:
             return distance_list[0]
