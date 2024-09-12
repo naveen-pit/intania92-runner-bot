@@ -11,6 +11,9 @@ def test_extract_distance_from_image():
     image_path = test_image_path / "5_01.jpg"
     assert extract_distance_from_image(image_path) == Decimal("5.01")
 
+    image_path = test_image_path / "14_01.jpg"
+    assert extract_distance_from_image(image_path) == Decimal("14.01")
+
     image_path = test_image_path / "18_54.jpg"
     assert extract_distance_from_image(image_path) == Decimal("18.54")
 
