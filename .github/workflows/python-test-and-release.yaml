@@ -92,4 +92,3 @@ jobs:
           extra_plugins: |
             @semantic-release/exec
             @semantic-release/git
-            @semantic-release/github@11.0.0
