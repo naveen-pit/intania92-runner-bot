@@ -254,11 +254,11 @@ def test_handle_distance_invalid_month(mocker):
 
 def test_handle_distance_update_invalid_name_format(mocker):
     reply_message_list = []
-    mock_event = MessageEvent(message=TextMessage(text="===Leaderboard"), source=SourceUser(user_id="user_id"))
+    mock_event = MessageEvent(message=TextMessage(text="Long John + 5"), source=SourceUser(user_id="user_id"))
     # Mock extract_name_and_distance_from_message to return None values
     mocker.patch("running_bot.utils.extract_name_and_distance_from_message", return_value=(None, None))
 
-    response = handle_distance_update("InvalidMessage", mock_event, None, reply_message_list, "+")
+    response = handle_distance_update("Long John + 5", mock_event, None, reply_message_list, "+")
 
     assert response == "Name contains space or has invalid format"
 
@@ -278,7 +278,7 @@ def test_handle_distance_update_new_name(mocker):
 
     assert len(reply_message_list) == 1
     assert isinstance(reply_message_list[0], TextSendMessage)
-    assert "Your name is set to John" in reply_message_list[0].text
+    assert "Your name was set to John" in reply_message_list[0].text
     assert response == "Updated Leaderboard"
 
 
@@ -342,6 +342,47 @@ def test_process_message_event_with_negative_distance_update(mocker):
     assert result == [TextSendMessage(text="Updated Leaderboard")]
 
 
+def test_process_message_event_with_name_containing_space(mocker):
+    mocker.patch("running_bot.main.is_leaderboard_format", return_value=False)
+    mocker.patch("running_bot.google_cloud.Firestore.__init__", return_value=None)
+    mocker.patch("running_bot.main.get_name", return_value=None)
+    mock_line_bot_api = mocker.patch("running_bot.main.LineBotApi")
+
+    mock_event = MessageEvent(message=TextMessage(text="John Doe +5"), source=SourceUser(user_id="user_id"))
+
+    result = process_message_event(mock_event, mock_line_bot_api)
+
+    assert result == [TextSendMessage(text="Name contains space or has invalid format")]
+
+
+def test_process_message_event_with_too_long_name(mocker):
+    mocker.patch("running_bot.main.is_leaderboard_format", return_value=False)
+    mocker.patch("running_bot.google_cloud.Firestore.__init__", return_value=None)
+    mocker.patch("running_bot.main.get_name", return_value=None)
+    mock_line_bot_api = mocker.patch("running_bot.main.LineBotApi")
+
+    mock_event = MessageEvent(
+        message=TextMessage(text="ThisIsTooLongLongName +5"), source=SourceUser(user_id="user_id")
+    )
+
+    result = process_message_event(mock_event, mock_line_bot_api)
+
+    assert result == [TextSendMessage(text="Name contains space or has invalid format")]
+
+
+def test_process_message_event_with_invalid_name(mocker):
+    mocker.patch("running_bot.main.is_leaderboard_format", return_value=False)
+    mocker.patch("running_bot.google_cloud.Firestore.__init__", return_value=None)
+    mocker.patch("running_bot.main.get_name", return_value=None)
+    mock_line_bot_api = mocker.patch("running_bot.main.LineBotApi")
+
+    mock_event = MessageEvent(message=TextMessage(text="ThisIsInvalid\nName +5"), source=SourceUser(user_id="user_id"))
+
+    result = process_message_event(mock_event, mock_line_bot_api)
+
+    assert result == []
+
+
 def test_process_message_event_with_zero_distance(mocker):
     mocker.patch("running_bot.main.is_leaderboard_format", return_value=False)
     mocker.patch("running_bot.google_cloud.Firestore.__init__", return_value=None)
@@ -357,7 +398,7 @@ def test_process_message_event_with_zero_distance(mocker):
     assert result == [
         TextSendMessage(
             text=(
-                "Your name is set to Bob.\n"
+                "Your name was set to Bob.\n"
                 "Bot always uses your latest submitted name. To change your name, type 'Name+0'"
             )
         )
