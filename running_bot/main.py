@@ -30,6 +30,7 @@ from .utils import (
     is_change_month,
     is_leaderboard_format,
     is_valid_month_string,
+    is_valid_update_distance_message,
 )
 
 
@@ -189,9 +190,9 @@ def handle_text_message(event: MessageEvent, stored_name: dict | None, reply_mes
     messages = event.message.text.strip()
     if is_leaderboard_format(messages):
         return handle_leaderboard_update(messages, event)
-    if "+" in messages:
+    if "+" in messages and is_valid_update_distance_message(messages, "+"):
         return handle_distance_update(messages, event, stored_name, reply_message_list, "+")
-    if "-" in messages:
+    if "-" in messages and is_valid_update_distance_message(messages, "-"):
         return handle_distance_update(messages, event, stored_name, reply_message_list, "-")
     return None
 
@@ -213,7 +214,7 @@ def handle_distance_update(
         reply_message_list.append(
             TextSendMessage(
                 text=(
-                    f"Your name is set to {extracted_name}.\n"
+                    f"Your name was set to {extracted_name}.\n"
                     "Bot always uses your latest submitted name. To change your name, type 'Name+0'"
                 )
             )

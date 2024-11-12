@@ -1,6 +1,7 @@
 """Utility functions."""
 
 import datetime
+import re
 from typing import Literal
 
 from linebot.models import MessageEvent, SourceGroup, SourceRoom
@@ -19,14 +20,44 @@ def is_valid_month_string(input_string: str, date_format: str = "%B %Y") -> bool
         return True
 
 
+def is_valid_update_distance_message(
+    message: str, split_symbol: Literal["+", "-"], max_characters_in_decimal: int = 10
+) -> bool:
+    """
+    Check valid update distance message.
+
+    Valid distance message should contain <NAME><split_symbol><NUMBER>.
+    """
+    elements = message.split(split_symbol)
+    minimum_element_count = 2
+    if len(elements) < minimum_element_count:
+        return False
+    if not elements[0].strip() or "\n" in elements[0].strip():
+        return False
+    return all(
+        len(elements[i]) < max_characters_in_decimal and contains_only_decimal(elements[i])
+        for i in range(1, len(elements))
+    )
+
+
+def is_valid_name(name: str, max_name_length: int = 15, not_allowed_char_tuple: tuple[str, ...] = (" ", "\n")) -> bool:
+    return len(name) > 0 and len(name) <= max_name_length and all(s not in name for s in not_allowed_char_tuple)
+
+
+def contains_only_decimal(text: str) -> bool:
+    # Pattern matches valid numbers with optional negative sign and decimal point
+    pattern = r"^-?\d*\.?\d+$"
+    return bool(re.match(pattern, text))
+
+
 def extract_name_and_distance_from_message(
     messages: str, split_symbol: Literal["+", "-"]
 ) -> tuple[str | None, str | None]:
-    elements = messages.split(split_symbol, 1)
-    valid_length = 2
-    if len(elements) != valid_length or not elements[0].strip() or " " in elements[0].strip():
-        return None, None
-    return elements[0].strip(), elements[1].strip()
+    if split_symbol in messages:
+        elements = messages.split(split_symbol, 1)
+        if is_valid_name(elements[0].strip()):
+            return elements[0].strip(), elements[1].strip()
+    return None, None
 
 
 def is_change_month(month_string: str) -> bool:

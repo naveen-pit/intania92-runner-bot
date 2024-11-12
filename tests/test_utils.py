@@ -7,11 +7,14 @@ from linebot.models import MessageEvent, SourceGroup, SourceRoom, SourceUser
 
 from running_bot.main import get_chat_id
 from running_bot.utils import (
+    contains_only_decimal,
     extract_name_and_distance_from_message,
     get_current_month,
     is_change_month,
     is_leaderboard_format,
     is_valid_month_string,
+    is_valid_name,
+    is_valid_update_distance_message,
 )
 
 
@@ -56,6 +59,52 @@ def test_is_valid_month_string():
     # test irrelevant text
     month_string = "Week5"
     assert not is_valid_month_string(month_string)
+
+
+def test_valid_update_distance_messages():
+    """Test valid update distance messages with different split symbols."""
+    assert is_valid_update_distance_message("Alice+10.5", "+")
+    assert is_valid_update_distance_message("Bob-23", "-")
+    assert is_valid_update_distance_message("Charlie+0.01", "+")
+    assert is_valid_update_distance_message("Alice+-10.5", "+")
+
+
+def test_invalid_update_distance_messages():
+    """Test invalid update distance messages with various reasons."""
+    assert not is_valid_update_distance_message("", "+")  # Empty message
+    assert not is_valid_update_distance_message("Alice", "+")  # Missing number
+    assert not is_valid_update_distance_message("+10.5", "+")  # Missing name
+    assert not is_valid_update_distance_message("Alice+ten", "+")  # Non-numeric number
+    assert not is_valid_update_distance_message("Alice+\n10.5", "+")  # Newline in name
+    assert not is_valid_update_distance_message("Alice+10.5-", "+")  # Extra split symbol
+    assert not is_valid_update_distance_message("Alice+10.5+", "+")  # Extra split symbol
+    assert not is_valid_update_distance_message("Alice+12345678901", "+")  # Too long distance
+
+
+def test_contains_only_decimal():
+    """Test helper function for decimal-only strings."""
+    assert contains_only_decimal("10.5")
+    assert contains_only_decimal("0.01")
+    assert contains_only_decimal("100")
+    assert not contains_only_decimal("10a")
+    assert not contains_only_decimal("a10")
+    assert not contains_only_decimal("10.a")
+
+
+def test_valid_names():
+    """Test valid names with different lengths and characters."""
+    assert is_valid_name("Alice")
+    assert is_valid_name("Bob123")
+    assert is_valid_name("Charlie_D", max_name_length=10)
+
+
+def test_invalid_names():
+    """Test invalid names with various reasons."""
+    assert not is_valid_name("")  # Empty name
+    assert not is_valid_name("  ")  # Only spaces
+    assert not is_valid_name("\n")  # Newline character
+    assert not is_valid_name("Alice Bob")  # Space in name
+    assert not is_valid_name("VeryLongNameIsInvalid", max_name_length=10)  # Exceeds max length
 
 
 @pytest.mark.usefixtures("_patch_datetime_now")
