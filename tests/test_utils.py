@@ -78,6 +78,7 @@ def test_invalid_update_distance_messages():
     assert not is_valid_update_distance_message("Alice+\n10.5", "+")  # Newline in name
     assert not is_valid_update_distance_message("Alice+10.5-", "+")  # Extra split symbol
     assert not is_valid_update_distance_message("Alice+10.5+", "+")  # Extra split symbol
+    assert not is_valid_update_distance_message("Alice+12345678901", "+")  # Too long distance
 
 
 def test_contains_only_decimal():

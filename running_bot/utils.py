@@ -20,7 +20,9 @@ def is_valid_month_string(input_string: str, date_format: str = "%B %Y") -> bool
         return True
 
 
-def is_valid_update_distance_message(message: str, split_symbol: Literal["+", "-"]) -> bool:
+def is_valid_update_distance_message(
+    message: str, split_symbol: Literal["+", "-"], max_characters_in_decimal: int = 10
+) -> bool:
     """
     Check valid update distance message.
 
@@ -32,7 +34,10 @@ def is_valid_update_distance_message(message: str, split_symbol: Literal["+", "-
         return False
     if not elements[0].strip() or "\n" in elements[0].strip():
         return False
-    return all(contains_only_decimal(elements[i]) for i in range(1, len(elements)))
+    return all(
+        len(elements[i]) < max_characters_in_decimal and contains_only_decimal(elements[i])
+        for i in range(1, len(elements))
+    )
 
 
 def is_valid_name(name: str, max_name_length: int = 15, not_allowed_char_tuple: tuple[str, ...] = (" ", "\n")) -> bool:
