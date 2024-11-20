@@ -6,6 +6,8 @@ from typing import Literal
 
 from linebot.models import MessageEvent, SourceGroup, SourceRoom
 
+from running_bot.constants import INVALID_NAME_CHAR_TUPLE, MAXIMUM_NAME_LENGTH
+
 
 def get_current_month(timezone_hour_diff: int = 7, date_format: str = "%B %Y") -> str:
     return (datetime.datetime.now(datetime.UTC) + datetime.timedelta(hours=timezone_hour_diff)).strftime(date_format)
@@ -40,7 +42,11 @@ def is_valid_update_distance_message(
     )
 
 
-def is_valid_name(name: str, max_name_length: int = 15, not_allowed_char_tuple: tuple[str, ...] = (" ", "\n")) -> bool:
+def is_valid_name(
+    name: str,
+    max_name_length: int = MAXIMUM_NAME_LENGTH,
+    not_allowed_char_tuple: tuple[str, ...] = INVALID_NAME_CHAR_TUPLE,
+) -> bool:
     return len(name) > 0 and len(name) <= max_name_length and all(s not in name for s in not_allowed_char_tuple)
 
 

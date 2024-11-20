@@ -12,6 +12,8 @@ from linebot.exceptions import InvalidSignatureError
 from linebot.models import ImageMessage, MessageEvent, TextMessage, TextSendMessage
 from PIL import Image
 
+from running_bot.constants import MAXIMUM_NAME_LENGTH
+
 from .cloud_interface import (
     get_image_queue,
     get_leaderboard,
@@ -206,7 +208,11 @@ def handle_distance_update(
 ) -> str | None:
     extracted_name, extracted_distance = extract_name_and_distance_from_message(messages, split_symbol)
     if not extracted_name or extracted_name == "" or not extracted_distance:
-        return "Name contains space or has invalid format"
+        return (
+            "Name has invalid format."
+            "- Name should not contain space or line break"
+            f"- Name should not exceed {MAXIMUM_NAME_LENGTH} characters"
+        )
 
     if (stored_name is None or stored_name["name"] != extracted_name) and event.source.user_id:
         firestore_client = Firestore(project=cfg.project_id, database=cfg.firestore_database)
