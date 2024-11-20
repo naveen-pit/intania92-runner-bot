@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "running_bot"
-version = "1.7.2"
+version = "1.7.3"
 description = "intania 92 runner bot "
 authors = ["Naveen <naveen_reg@outlook.com>"]
 readme = "README.md"
