@@ -12,8 +12,6 @@ from linebot.exceptions import InvalidSignatureError
 from linebot.models import ImageMessage, MessageEvent, TextMessage, TextSendMessage
 from PIL import Image
 
-from running_bot.constants import MAXIMUM_NAME_LENGTH
-
 from .cloud_interface import (
     get_image_queue,
     get_leaderboard,
@@ -23,6 +21,7 @@ from .cloud_interface import (
     upsert_image_queue,
 )
 from .config import cfg
+from .constants import MAXIMUM_NAME_LENGTH
 from .google_cloud import Firestore
 from .ocr import extract_distance_from_image
 from .utils import (
