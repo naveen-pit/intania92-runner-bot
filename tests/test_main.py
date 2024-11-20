@@ -260,7 +260,7 @@ def test_handle_distance_update_invalid_name_format(mocker):
 
     response = handle_distance_update("Long John + 5", mock_event, None, reply_message_list, "+")
 
-    assert response == "Name contains space or has invalid format"
+    assert "Name has invalid format." in response
 
 
 def test_handle_distance_update_new_name(mocker):
@@ -352,7 +352,8 @@ def test_process_message_event_with_name_containing_space(mocker):
 
     result = process_message_event(mock_event, mock_line_bot_api)
 
-    assert result == [TextSendMessage(text="Name contains space or has invalid format")]
+    assert len(result) == 1
+    assert "Name has invalid format." in result[0].text
 
 
 def test_process_message_event_with_too_long_name(mocker):
@@ -367,7 +368,8 @@ def test_process_message_event_with_too_long_name(mocker):
 
     result = process_message_event(mock_event, mock_line_bot_api)
 
-    assert result == [TextSendMessage(text="Name contains space or has invalid format")]
+    assert len(result) == 1
+    assert "Name has invalid format." in result[0].text
 
 
 def test_process_message_event_with_invalid_name(mocker):

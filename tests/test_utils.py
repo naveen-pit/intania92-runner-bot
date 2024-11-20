@@ -105,6 +105,10 @@ def test_invalid_names():
     assert not is_valid_name("\n")  # Newline character
     assert not is_valid_name("Alice Bob")  # Space in name
     assert not is_valid_name("VeryLongNameIsInvalid", max_name_length=10)  # Exceeds max length
+    name_with_new_line = """N
+
+    """
+    assert not is_valid_name(name_with_new_line)  # Contain new line
 
 
 @pytest.mark.usefixtures("_patch_datetime_now")
