@@ -6,7 +6,7 @@ from typing import Literal
 
 from linebot.models import MessageEvent, SourceGroup, SourceRoom
 
-from running_bot.constants import INVALID_NAME_CHAR_TUPLE, MAXIMUM_NAME_LENGTH
+from .constants import INVALID_NAME_CHAR_TUPLE, MAXIMUM_NAME_LENGTH
 
 
 def get_current_month(timezone_hour_diff: int = 7, date_format: str = "%B %Y") -> str:
