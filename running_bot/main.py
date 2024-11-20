@@ -209,8 +209,7 @@ def handle_distance_update(
     if not extracted_name or extracted_name == "" or not extracted_distance:
         return (
             "Name has invalid format."
-            "- Name should not contain space or line break"
-            f"- Name should not exceed {MAXIMUM_NAME_LENGTH} characters"
+            f" Name should not contain space and is limited to {MAXIMUM_NAME_LENGTH} characters"
         )
 
     if (stored_name is None or stored_name["name"] != extracted_name) and event.source.user_id:

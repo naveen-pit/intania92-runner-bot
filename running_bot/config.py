@@ -7,7 +7,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class RunSetting(BaseSettings):
-    """Configuration object affecting all parts of decisioning pipeline.
+    """Configuration object for the entire project.
 
     All config value can be altered via environment variables or .env file. The values must be prefixed
     with "LINEBOT_" prefix. Here is the example of default configuration as .env file
