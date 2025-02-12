@@ -36,10 +36,10 @@ flowchart LR
 ├── main.py               # Main entry point for the application
 ├── cloud_interface.py    # Interfaces for handling google cloud operations
 ├── config.py             # Configuration file for setting up project-specific settings
+├── constants.py          # Constants variables
 ├── google_cloud.py       # Google Cloud Firestore and Secret client setup
 ├── ocr.py                # Handle distance extraction from the image using OCR algorithm
 ├── utils.py              # Utility functions
-├── constants.py          # Constants variables
 ├── cloudbuild.yaml       # Google Cloud Build configuration for deployment
 ├── Makefile              # Makefile for setting up and running the project
 └── README.md             # Project documentation

@@ -64,9 +64,12 @@ def test_is_valid_month_string():
 def test_valid_update_distance_messages():
     """Test valid update distance messages with different split symbols."""
     assert is_valid_update_distance_message("Alice+10.5", "+")
+    assert is_valid_update_distance_message("Alice +10.5", "+")
     assert is_valid_update_distance_message("Bob-23", "-")
     assert is_valid_update_distance_message("Charlie+0.01", "+")
     assert is_valid_update_distance_message("Alice+-10.5", "+")
+    assert is_valid_update_distance_message("Alice+ 10.5 + 2", "+")
+    assert is_valid_update_distance_message("Alice+\n 10.5 + \n2", "+")
 
 
 def test_invalid_update_distance_messages():
@@ -75,7 +78,7 @@ def test_invalid_update_distance_messages():
     assert not is_valid_update_distance_message("Alice", "+")  # Missing number
     assert not is_valid_update_distance_message("+10.5", "+")  # Missing name
     assert not is_valid_update_distance_message("Alice+ten", "+")  # Non-numeric number
-    assert not is_valid_update_distance_message("Alice+\n10.5", "+")  # Newline in name
+    assert not is_valid_update_distance_message("Alice\nA+10.5", "+")  # Newline in name
     assert not is_valid_update_distance_message("Alice+10.5-", "+")  # Extra split symbol
     assert not is_valid_update_distance_message("Alice+10.5+", "+")  # Extra split symbol
     assert not is_valid_update_distance_message("Alice+12345678901", "+")  # Too long distance

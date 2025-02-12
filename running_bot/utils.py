@@ -37,7 +37,7 @@ def is_valid_update_distance_message(
     if not elements[0].strip() or "\n" in elements[0].strip():
         return False
     return all(
-        len(elements[i]) < max_characters_in_decimal and contains_only_decimal(elements[i])
+        len(elements[i]) < max_characters_in_decimal and contains_only_decimal(elements[i].strip())
         for i in range(1, len(elements))
     )
 
